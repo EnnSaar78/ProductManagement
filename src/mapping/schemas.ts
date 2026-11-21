@@ -1,6 +1,7 @@
 import { z } from "zod";
 
-/** Zod-skeemid Claude'i struktureeritud väljunditele. Record-tüüpe välditakse (structured outputs nõuab kindlaid võtmeid). */
+/** Zod-skeemid Claude'i struktureeritud väljunditele.
+ * Piirangud: ei mingeid record-tüüpe; nullable/union välju max 16 skeemi kohta, seega tekstiväljad on tühja stringiga "teadmata". */
 
 export const UrlSelectionSchema = z.object({
   urls: z.array(
@@ -18,13 +19,13 @@ const PricingModel = z.enum(["subscription", "usage", "freemium", "one_off", "re
 
 export const PlanSchema = z.object({
   name: z.string(),
-  tier: z.string().nullable(),
+  tier: z.string(),
   price: z.number().nullable(),
-  currency: z.string().nullable(),
+  currency: z.string(),
   price_unit: PriceUnit,
   contract_months: z.number().int().nullable(),
-  users: z.string().nullable(),
-  sla: z.string().nullable(),
+  users: z.string(),
+  sla: z.string(),
   included: z.array(z.string()),
   attributes: z.array(z.object({ key: z.string(), value: z.string() })),
 });
@@ -32,9 +33,9 @@ export const PlanSchema = z.object({
 export const AddonSchema = z.object({
   name: z.string(),
   price: z.number().nullable(),
-  currency: z.string().nullable(),
+  currency: z.string(),
   price_unit: PriceUnit,
-  description: z.string().nullable(),
+  description: z.string(),
 });
 
 export const ExtractedProductSchema = z.object({
@@ -42,19 +43,19 @@ export const ExtractedProductSchema = z.object({
   category_code: z.string(),
   segment: z.enum(["B2B", "B2C"]),
   summary: z.string(),
-  target_customer: z.string().nullable(),
+  target_customer: z.string(),
   components: z.array(z.string()),
   addons: z.array(AddonSchema),
   plans: z.array(PlanSchema),
   pricing_model: PricingModel,
-  price_notes: z.string().nullable(),
-  terms: z.string().nullable(),
-  sla_notes: z.string().nullable(),
-  channel: z.string().nullable(),
-  technology: z.string().nullable(),
-  partners: z.string().nullable(),
-  headline: z.string().nullable(),
-  original_headline: z.string().nullable(),
+  price_notes: z.string(),
+  terms: z.string(),
+  sla_notes: z.string(),
+  channel: z.string(),
+  technology: z.string(),
+  partners: z.string(),
+  headline: z.string(),
+  original_headline: z.string(),
   supporting_messages: z.array(z.string()),
   proof_points: z.array(z.string()),
   differentiators: z.array(z.string()),
@@ -65,7 +66,7 @@ export type ExtractedProduct = z.infer<typeof ExtractedProductSchema>;
 export const PageExtractionSchema = z.object({
   page_kind: z.enum(["product", "category_overview", "pricing", "news", "support", "other"]),
   products: z.array(ExtractedProductSchema),
-  notes: z.string().nullable(),
+  notes: z.string(),
 });
 export type PageExtraction = z.infer<typeof PageExtractionSchema>;
 
@@ -98,7 +99,7 @@ export const SynthesisSchema = z.object({
     z.object({
       kind: z.enum(["job", "pain", "gain"]),
       customer_text: z.string(),
-      product_response: z.string().nullable(),
+      product_response: z.string(),
       fit_score: z.number().int().min(0).max(3),
     }),
   ),

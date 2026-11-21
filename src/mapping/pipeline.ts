@@ -12,6 +12,7 @@ const MAX_TEXT = 60_000; // märki lehe kohta LLM-ile
 const MAX_CANDIDATES = 400;
 const newId = () => crypto.randomUUID();
 const nowIso = () => new Date().toISOString();
+const nz = (s: string | null | undefined) => (s && s.trim() ? s.trim() : null);
 
 export function dbFor(env: MappingEnv): Db {
   return drizzle(env.DB, { schema });
@@ -276,14 +277,14 @@ export async function mergeAndUpsert(env: MappingEnv, jobId: string): Promise<st
       await db
         .insert(schema.productPlans)
         .values({
-          id: newId(), productId, name: pl.name, tier: pl.tier, price: pl.price, currency: pl.currency ?? c.market.currency, priceEur: pl.currency?.toUpperCase() === "EUR" ? pl.price : null,
-          priceUnit: pl.price_unit === "unknown" ? "month" : pl.price_unit, contractMonths: pl.contract_months, users: pl.users, sla: pl.sla, included: pl.included.join("\n"),
+          id: newId(), productId, name: pl.name, tier: nz(pl.tier), price: pl.price, currency: nz(pl.currency) ?? c.market.currency, priceEur: (nz(pl.currency) ?? c.market.currency).toUpperCase() === "EUR" ? pl.price : null,
+          priceUnit: pl.price_unit === "unknown" ? "month" : pl.price_unit, contractMonths: pl.contract_months, users: nz(pl.users), sla: nz(pl.sla), included: pl.included.join("\n"),
           attributes: pl.attributes.length ? JSON.stringify(Object.fromEntries(pl.attributes.map((a) => [a.key, a.value]))) : null, sortOrder: order++,
         })
         .run();
     }
     for (const ad of mp.addons) {
-      await db.insert(schema.productAddons).values({ id: newId(), productId, name: ad.name, price: ad.price, currency: ad.currency ?? c.market.currency, priceUnit: ad.price_unit === "unknown" ? null : ad.price_unit, description: ad.description }).run();
+      await db.insert(schema.productAddons).values({ id: newId(), productId, name: ad.name, price: ad.price, currency: nz(ad.currency) ?? c.market.currency, priceUnit: ad.price_unit === "unknown" ? null : ad.price_unit, description: nz(ad.description) }).run();
     }
     // arhetüübid
     await db.delete(schema.productArchetypes).where(eq(schema.productArchetypes.productId, productId)).run();
@@ -295,7 +296,7 @@ export async function mergeAndUpsert(env: MappingEnv, jobId: string): Promise<st
     await db.delete(schema.valueMessages).where(and(eq(schema.valueMessages.productId, productId), eq(schema.valueMessages.origin, "source"))).run();
     const msg = (kind: "headline" | "supporting" | "proof" | "differentiator", text: string, originalText: string | null = null) =>
       db.insert(schema.valueMessages).values({ id: newId(), productId, kind, text, originalText, origin: "source", sourceId: primarySource }).run();
-    if (mp.headline) await msg("headline", mp.headline, mp.original_headline);
+    if (nz(mp.headline)) await msg("headline", mp.headline, nz(mp.original_headline));
     for (const s of mp.supporting_messages) await msg("supporting", s);
     for (const s of mp.proof_points) await msg("proof", s);
     for (const s of mp.differentiators) await msg("differentiator", s);
@@ -314,15 +315,15 @@ function productFields(mp: MergedProduct, categoryId: string) {
     name: mp.name,
     status: mp.status,
     summary: mp.summary,
-    targetCustomer: mp.target_customer,
-    components: mp.components.join("\n"),
+    targetCustomer: nz(mp.target_customer),
+    components: mp.components.join("\n") || null,
     addonsSummary: mp.addons.map((a) => a.name).join("\n") || null,
-    slaNotes: mp.sla_notes,
+    slaNotes: nz(mp.sla_notes),
     pricingModel: mp.pricing_model,
-    priceNotes: [mp.price_notes, mp.terms ? `Tingimused: ${mp.terms}` : null].filter(Boolean).join("\n") || null,
-    channel: mp.channel,
-    technology: mp.technology,
-    partners: mp.partners,
+    priceNotes: [nz(mp.price_notes), nz(mp.terms) ? `Tingimused: ${mp.terms.trim()}` : null].filter(Boolean).join("\n") || null,
+    channel: nz(mp.channel),
+    technology: nz(mp.technology),
+    partners: nz(mp.partners),
   };
 }
 
@@ -355,7 +356,7 @@ export async function synthesizeProduct(env: MappingEnv, jobId: string, productI
   }
   await db.delete(schema.painGainItems).where(and(eq(schema.painGainItems.productId, productId), eq(schema.painGainItems.origin, "source"))).run();
   for (const pg of s.pain_gain) {
-    await db.insert(schema.painGainItems).values({ id: newId(), productId, kind: pg.kind, customerText: pg.customer_text, productResponse: pg.product_response, fitScore: pg.fit_score, origin: "source", sourceId }).run();
+    await db.insert(schema.painGainItems).values({ id: newId(), productId, kind: pg.kind, customerText: pg.customer_text, productResponse: nz(pg.product_response), fitScore: pg.fit_score, origin: "source", sourceId }).run();
   }
   await db.delete(schema.swotItems).where(and(eq(schema.swotItems.productId, productId), eq(schema.swotItems.origin, "source"))).run();
   const quadrants = { strength: s.swot.strengths, weakness: s.swot.weaknesses, opportunity: s.swot.opportunities, threat: s.swot.threats } as const;

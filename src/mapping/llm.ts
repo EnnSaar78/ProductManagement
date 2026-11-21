@@ -31,7 +31,7 @@ function systemBase(ctx: CompanyContext) {
   return [
     "Oled telekommunikatsiooni- ja IT-sektori äriarenduse analüütik. Kaardistad operaatorite tooteid ja ärimudeleid ühtses struktuuris.",
     `Ettevõte: ${ctx.name} (${ctx.market}, tüüp: ${ctx.type}, veeb: ${ctx.website ?? "-"}). Fookus: ${ctx.segment === "ALL" ? "B2B ja B2C" : ctx.segment} teenused.`,
-    `Kirjuta kõik vabatekstiväljad ${LANG[ctx.language] ?? LANG.et}, lühidalt ja faktipõhiselt. Ära mõtle välja hindu ega tingimusi: kui infot ei ole, jäta väli tühjaks (null või tühi loend).`,
+    `Kirjuta kõik vabatekstiväljad ${LANG[ctx.language] ?? LANG.et}, lühidalt ja faktipõhiselt. Ära mõtle välja hindu ega tingimusi: kui infot ei ole, jäta tekstiväli tühjaks stringiks, arv null-iks ja loend tühjaks.`,
     "Rahasummad kirjuta numbrina ilma valuutata ja märgi valuuta eraldi (ISO kood). Käibemaksuta ja -ga hinna puhul eelista lehel kuvatud põhihinda ja märgi price_notes väljale, kumb see on.",
   ].join("\n");
 }
@@ -136,7 +136,7 @@ class MockLlm implements Llm {
     return {
       data: {
         page_kind: "product",
-        notes: null,
+        notes: "",
         products: [
           {
             name,
@@ -145,15 +145,15 @@ class MockLlm implements Llm {
             summary: `Mock-kokkuvõte lehelt ${url}`,
             target_customer: "Keskmise suurusega ettevõtted",
             components: ["Komponent A", "Komponent B"],
-            addons: [{ name: "Lisateenus X", price: 10, currency: "EUR", price_unit: "month", description: null }],
-            plans: [{ name: `${name} Standard`, tier: "S", price: priceMatch ? Number(priceMatch[1].replace(",", ".")) : null, currency: "EUR", price_unit: "month", contract_months: 12, users: null, sla: "99,9 %", included: ["Tugi 24/7"], attributes: [{ key: "bandwidth", value: "1 Gbit/s" }] }],
+            addons: [{ name: "Lisateenus X", price: 10, currency: "EUR", price_unit: "month", description: "" }],
+            plans: [{ name: `${name} Standard`, tier: "S", price: priceMatch ? Number(priceMatch[1].replace(",", ".")) : null, currency: "EUR", price_unit: "month", contract_months: 12, users: "", sla: "99,9 %", included: ["Tugi 24/7"], attributes: [{ key: "bandwidth", value: "1 Gbit/s" }] }],
             pricing_model: "subscription",
             price_notes: "mock",
             terms: "12 kuu leping",
-            sla_notes: null,
+            sla_notes: "",
             channel: "Otsemüük",
-            technology: null,
-            partners: null,
+            technology: "",
+            partners: "",
             headline: `Mock-peasõnum: ${name}`,
             original_headline: title,
             supporting_messages: ["Toetav sõnum 1"],
@@ -187,8 +187,8 @@ class MockLlm implements Llm {
         },
         pain_gain: [
           { kind: "pain", customer_text: "Mock-valu", product_response: "Mock-leevendaja", fit_score: 2 },
-          { kind: "gain", customer_text: "Mock-kasu", product_response: null, fit_score: 0 },
-          { kind: "job", customer_text: "Mock-töö", product_response: null, fit_score: 1 },
+          { kind: "gain", customer_text: "Mock-kasu", product_response: "", fit_score: 0 },
+          { kind: "job", customer_text: "Mock-töö", product_response: "", fit_score: 1 },
         ],
         swot: { strengths: ["Mock S"], weaknesses: ["Mock W"], opportunities: ["Mock O"], threats: ["Mock T"] },
       },
