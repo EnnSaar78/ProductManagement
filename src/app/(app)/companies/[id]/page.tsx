@@ -8,6 +8,7 @@ import { ConfirmButton } from "@/components/ConfirmButton";
 import { CanvasGrid } from "@/components/CanvasGrid";
 import { SourceForm } from "@/components/SourceForm";
 import { SourceList } from "@/components/SourceList";
+import { MappingCard } from "@/components/MappingCard";
 import { addCompanyKpi, deleteCompanyKpi } from "@/lib/actions/content";
 import { listProducts, sourceMap } from "@/lib/queries";
 import { canEdit, requireUser } from "@/lib/auth";
@@ -143,6 +144,8 @@ export default async function CompanyPage({ params }: { params: Promise<{ id: st
           </form>
         )}
       </Card>
+
+      <MappingCard companyId={id} website={company.website} editable={editable} />
 
       <Card title={t("canvas")} className="mt-4">
         <CanvasGrid items={canvas} target={{ companyId: id }} path={path} sources={sources} srcMap={srcMap} editable={editable} />

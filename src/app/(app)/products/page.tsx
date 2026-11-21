@@ -8,6 +8,7 @@ export default async function ProductsPage({ searchParams }: { searchParams: Pro
   const user = await requireUser();
   const t = await getTranslations("products");
   const tc = await getTranslations("common");
+  const tm = await getTranslations("mapping");
   const locale = await getLocale();
   const sp = await searchParams;
   const segment = sp.segment === "B2C" ? "B2C" : sp.segment === "" ? undefined : "B2B";
@@ -90,7 +91,10 @@ export default async function ProductsPage({ searchParams }: { searchParams: Pro
                   <td>
                     <Badge>{p.categoryCode}</Badge> {cname(p)}
                   </td>
-                  <td>{t(`statuses.${p.status}`)}</td>
+                  <td>
+                    {t(`statuses.${p.status}`)}
+                    {p.reviewStatus === "unreviewed" && <span className="badge ml-1 bg-amber-50 text-amber-800">{tm("review.unreviewed")}</span>}
+                  </td>
                   <td>{t(`pricingModels.${p.pricingModel}`)}</td>
                 </tr>
               ))}

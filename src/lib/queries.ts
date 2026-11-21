@@ -48,6 +48,7 @@ export async function listProducts(filter?: { categoryId?: string; companyId?: s
       pricingModel: schema.products.pricingModel,
       summary: schema.products.summary,
       updatedAt: schema.products.updatedAt,
+      reviewStatus: schema.products.reviewStatus,
       companyId: schema.companies.id,
       companyName: schema.companies.name,
       marketId: schema.markets.id,

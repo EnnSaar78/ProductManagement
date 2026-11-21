@@ -406,5 +406,74 @@
     "password": "Password (at least 10 characters)",
     "seed": "Load reference data (markets, companies, categories, archetypes, trend themes)",
     "submit": "Create administrator and start"
+  },
+  "mapping": {
+    "title": "Website mapping",
+    "hint": "Mapping reads products, plans, prices, terms and add-ons from the company website and builds a Business Model Canvas, Pain–Gain matrix and SWOT for each product. Results are flagged for review.",
+    "seedUrls": "Start pages (one URL per line)",
+    "includeHints": "Hints (URL or topic keywords, comma separated)",
+    "excludePatterns": "Exclude (substrings, comma separated)",
+    "maxPages": "Max pages",
+    "schedule": "Schedule",
+    "manualOnly": "Manual only",
+    "everyDays": "Every {days} days",
+    "language": "Content language",
+    "extractModel": "Extraction model",
+    "synthesisModel": "Synthesis model",
+    "enabled": "Schedule enabled",
+    "saveConfig": "Save settings",
+    "saveFirst": "Save the settings first, then you can start a mapping run.",
+    "runNow": "Run mapping",
+    "running": "Mapping in progress…",
+    "inProgress": "Job in progress",
+    "lastRun": "Last",
+    "nextRun": "Next",
+    "jobs": "Mapping runs",
+    "started": "Started",
+    "trigger": "Trigger",
+    "pages": "Pages",
+    "products": "Products",
+    "found": "Found",
+    "created": "New",
+    "updated": "Updated",
+    "tokens": "Tokens (in / out)",
+    "estCost": "Estimated cost",
+    "log": "Log",
+    "touchedProducts": "Mapped products",
+    "textLength": "Text length",
+    "jobTitle": "Mapping run",
+    "cancel": "Cancel",
+    "confirmCancel": "Cancel this mapping run?",
+    "statuses": {
+      "queued": "Queued",
+      "running": "Running",
+      "done": "Done",
+      "failed": "Failed",
+      "cancelled": "Cancelled"
+    },
+    "triggers": {
+      "manual": "Manual",
+      "schedule": "Scheduled"
+    },
+    "phases": {
+      "discover": "Discovering pages",
+      "pages": "Reading pages",
+      "merge": "Merging products",
+      "synthesize": "Building analyses",
+      "finish": "Finished"
+    },
+    "pageStatuses": {
+      "queued": "Queued",
+      "fetched": "Fetched",
+      "extracted": "Extracted",
+      "skipped": "Skipped",
+      "failed": "Failed"
+    },
+    "review": {
+      "unreviewed": "Needs review",
+      "reviewed": "Reviewed"
+    },
+    "reviewBanner": "This product card was built by automated mapping and needs review. Entries from sources are marked separately.",
+    "markReviewed": "Mark as reviewed"
   }
 }

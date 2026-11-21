@@ -1,0 +1,7 @@
+# Kohalik arendus: kopeeri .dev.vars nimega ja täida
+# Workeri saladus toodangus: npx wrangler secret put ANTHROPIC_API_KEY
+ANTHROPIC_API_KEY=
+# 1 = kasuta mock-LLM-i (ilma API võtmeta), 0 = päris Claude
+LLM_MOCK=0
+# 1 = luba localhost/privaat-IP-de allalaadimine (ainult testiks)
+ALLOW_PRIVATE_FETCH=0

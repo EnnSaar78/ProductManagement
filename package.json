@@ -17,13 +17,15 @@
     "db:migrate:remote": "wrangler d1 migrations apply DB --remote"
   },
   "dependencies": {
+    "@anthropic-ai/sdk": "^1.12.0",
     "@opennextjs/cloudflare": "^1.20.18",
     "drizzle-orm": "^0.45.4",
     "next": "^15.5.29",
     "next-intl": "^4.15.3",
     "react": "^19.3.1",
     "react-dom": "^19.3.1",
-    "wrangler": "^4.166.0"
+    "wrangler": "^4.166.0",
+    "zod": "^4.6.7"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4.3.5",

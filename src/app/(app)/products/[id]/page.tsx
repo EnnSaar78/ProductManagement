@@ -12,6 +12,7 @@ import { SwotTab } from "@/components/product/SwotTab";
 import { MessagesTab } from "@/components/product/MessagesTab";
 import { KpisTab } from "@/components/product/KpisTab";
 import { deleteProduct, saveInsight } from "@/lib/actions/content";
+import { markProductReviewed } from "@/lib/actions/mapping";
 import { getProductFull } from "@/lib/queries";
 import { canEdit, requireUser } from "@/lib/auth";
 
@@ -29,6 +30,7 @@ export default async function ProductPage({ params, searchParams }: { params: Pr
   const { product, company, market, category, plans, addons, archetypes, canvas, painGain, swot, messages, kpis, insight, sources, srcMap } = full;
   const t = await getTranslations("products");
   const tc = await getTranslations("common");
+  const tm = await getTranslations("mapping");
   const locale = await getLocale();
   const path = `/products/${id}`;
   const headline = messages.find((m) => m.kind === "headline");
@@ -62,6 +64,16 @@ export default async function ProductPage({ params, searchParams }: { params: Pr
           ) : undefined
         }
       />
+      {product.reviewStatus === "unreviewed" && (
+        <div className="mb-4 flex flex-wrap items-center justify-between gap-2 rounded border border-amber-200 bg-amber-50 p-3 text-sm text-amber-900">
+          <span>{tm("reviewBanner")}{product.lastMappedAt ? ` (${product.lastMappedAt.slice(0, 16).replace("T", " ")})` : ""}</span>
+          {editable && (
+            <form action={markProductReviewed.bind(null, id)}>
+              <button className="btn-secondary text-xs">{tm("markReviewed")}</button>
+            </form>
+          )}
+        </div>
+      )}
       {headline && <p className="mb-4 text-lg font-medium">„{headline.text}“</p>}
       <nav className="mb-4 flex flex-wrap gap-1 border-b border-[var(--border)]">
         {TABS.map((x) => (

@@ -142,11 +142,14 @@ export const products = sqliteTable(
     technology: text("technology"),
     partners: text("partners"),
     notes: text("notes"),
+    sourceKey: text("source_key"), // kaardistuse stabiilne võti (ettevõte + toote slug)
+    reviewStatus: text("review_status", { enum: ["unreviewed", "reviewed"] }).notNull().default("reviewed"),
+    lastMappedAt: text("last_mapped_at"),
     createdBy: text("created_by"),
     createdAt: text("created_at").notNull().default(now()),
     updatedAt: text("updated_at").notNull().default(now()),
   },
-  (t) => [index("products_company_idx").on(t.companyId), index("products_category_idx").on(t.categoryId)],
+  (t) => [index("products_company_idx").on(t.companyId), index("products_category_idx").on(t.categoryId), index("products_source_key_idx").on(t.sourceKey)],
 );
 
 // ---------- Tasand 5: Paketid ja lisateenused ----------
@@ -341,3 +344,71 @@ export const auditLog = sqliteTable("audit_log", {
   action: text("action").notNull(),
   at: text("at").notNull().default(now()),
 });
+
+// ---------- Kaardistusmoodul (kodulehtede kaardistus) ----------
+export const mappingConfigs = sqliteTable("mapping_configs", {
+  id: text("id").primaryKey(),
+  companyId: text("company_id").notNull().unique().references(() => companies.id, { onDelete: "cascade" }),
+  seedUrls: text("seed_urls").notNull(), // üks URL rea kohta
+  includeHints: text("include_hints"), // märksõnad URL-ide/lehtede eelistamiseks (nt business, yritys, ariklient)
+  excludePatterns: text("exclude_patterns"), // alamstringid, mida vältida (nt /blog, /careers)
+  segment: text("segment", { enum: ["B2B", "B2C", "ALL"] }).notNull().default("B2B"),
+  maxPages: integer("max_pages").notNull().default(30),
+  scheduleDays: integer("schedule_days").notNull().default(0), // 0 = ainult käsitsi
+  extractModel: text("extract_model").notNull().default("claude-opus-5-5"),
+  synthesisModel: text("synthesis_model").notNull().default("claude-opus-5-5"),
+  language: text("language").notNull().default("et"),
+  enabled: integer("enabled", { mode: "boolean" }).notNull().default(true),
+  lastRunAt: text("last_run_at"),
+  nextRunAt: text("next_run_at"),
+  updatedAt: text("updated_at").notNull().default(now()),
+});
+
+export const mappingJobs = sqliteTable(
+  "mapping_jobs",
+  {
+    id: text("id").primaryKey(),
+    companyId: text("company_id").notNull().references(() => companies.id, { onDelete: "cascade" }),
+    trigger: text("trigger", { enum: ["manual", "schedule"] }).notNull().default("manual"),
+    status: text("status", { enum: ["queued", "running", "done", "failed", "cancelled"] }).notNull().default("queued"),
+    phase: text("phase"), // discover / pages / merge / synthesize / finish
+    workflowInstanceId: text("workflow_instance_id"),
+    configSnapshot: text("config_snapshot"), // JSON
+    pagesTotal: integer("pages_total").notNull().default(0),
+    pagesDone: integer("pages_done").notNull().default(0),
+    productsFound: integer("products_found").notNull().default(0),
+    productsCreated: integer("products_created").notNull().default(0),
+    productsUpdated: integer("products_updated").notNull().default(0),
+    inputTokens: integer("input_tokens").notNull().default(0),
+    outputTokens: integer("output_tokens").notNull().default(0),
+    log: text("log"), // JSON array of {at, level, msg}
+    error: text("error"),
+    createdBy: text("created_by"),
+    createdAt: text("created_at").notNull().default(now()),
+    startedAt: text("started_at"),
+    finishedAt: text("finished_at"),
+  },
+  (t) => [index("mapping_jobs_company_idx").on(t.companyId), index("mapping_jobs_created_idx").on(t.createdAt)],
+);
+
+export const mappingPages = sqliteTable(
+  "mapping_pages",
+  {
+    id: text("id").primaryKey(),
+    jobId: text("job_id").notNull().references(() => mappingJobs.id, { onDelete: "cascade" }),
+    companyId: text("company_id").notNull(),
+    url: text("url").notNull(),
+    title: text("title"),
+    status: text("status", { enum: ["queued", "fetched", "extracted", "skipped", "failed"] }).notNull().default("queued"),
+    httpStatus: integer("http_status"),
+    contentHash: text("content_hash"),
+    textLength: integer("text_length"),
+    text: text("text"), // puhastatud tekst (kärbitud)
+    extracted: text("extracted"), // JSON: lehelt leitud tooted
+    productsFound: integer("products_found").notNull().default(0),
+    sourceId: text("source_id"),
+    error: text("error"),
+    fetchedAt: text("fetched_at"),
+  },
+  (t) => [index("mapping_pages_job_idx").on(t.jobId), index("mapping_pages_company_url_idx").on(t.companyId, t.url)],
+);

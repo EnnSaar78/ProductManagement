@@ -406,5 +406,74 @@
     "password": "Parool (vähemalt 10 märki)",
     "seed": "Lisa alusandmed (turud, ettevõtted, kategooriad, arhetüübid, trenditeemad)",
     "submit": "Loo administraator ja alusta"
+  },
+  "mapping": {
+    "title": "Kodulehe kaardistus",
+    "hint": "Kaardistus loeb ettevõtte kodulehelt tooted, paketid, hinnad, tingimused ja lisateenused ning koostab igale tootele Business Model Canvase, Pain–Gain maatriksi ja SWOT-i. Tulemused märgitakse ülevaatamist vajavaks.",
+    "seedUrls": "Alguslehed (üks URL rea kohta)",
+    "includeHints": "Vihjed (URL-i või teema märksõnad, komaga)",
+    "excludePatterns": "Välista (alamstringid, komaga)",
+    "maxPages": "Lehti max",
+    "schedule": "Regulaarsus",
+    "manualOnly": "Ainult käsitsi",
+    "everyDays": "Iga {days} päeva",
+    "language": "Sisu keel",
+    "extractModel": "Väljavõtte mudel",
+    "synthesisModel": "Sünteesi mudel",
+    "enabled": "Ajastus lubatud",
+    "saveConfig": "Salvesta seaded",
+    "saveFirst": "Salvesta enne seaded, siis saab kaardistuse käivitada.",
+    "runNow": "Käivita kaardistus",
+    "running": "Kaardistus käib…",
+    "inProgress": "Töö pooleli",
+    "lastRun": "Viimane",
+    "nextRun": "Järgmine",
+    "jobs": "Kaardistused",
+    "started": "Alustatud",
+    "trigger": "Käivitaja",
+    "pages": "Lehed",
+    "products": "Tooted",
+    "found": "Leide",
+    "created": "Uusi",
+    "updated": "Uuendatud",
+    "tokens": "Tokenid (sisse / välja)",
+    "estCost": "Hinnanguline kulu",
+    "log": "Logi",
+    "touchedProducts": "Kaardistatud tooted",
+    "textLength": "Teksti pikkus",
+    "jobTitle": "Kaardistus",
+    "cancel": "Katkesta",
+    "confirmCancel": "Kas katkestada kaardistus?",
+    "statuses": {
+      "queued": "Ootel",
+      "running": "Käib",
+      "done": "Valmis",
+      "failed": "Ebaõnnestus",
+      "cancelled": "Katkestatud"
+    },
+    "triggers": {
+      "manual": "Käsitsi",
+      "schedule": "Ajastatud"
+    },
+    "phases": {
+      "discover": "Lehtede avastus",
+      "pages": "Lehtede lugemine",
+      "merge": "Toodete ühendamine",
+      "synthesize": "Analüüside koostamine",
+      "finish": "Lõpetatud"
+    },
+    "pageStatuses": {
+      "queued": "Ootel",
+      "fetched": "Laetud",
+      "extracted": "Loetud",
+      "skipped": "Vahele jäetud",
+      "failed": "Ebaõnnestus"
+    },
+    "review": {
+      "unreviewed": "Vajab ülevaatust",
+      "reviewed": "Üle vaadatud"
+    },
+    "reviewBanner": "See tootekaart on koostatud automaatse kaardistusega ja vajab ülevaatust. Allikast pärit kirjed on märgitud eraldi.",
+    "markReviewed": "Märgi üle vaadatuks"
   }
 }

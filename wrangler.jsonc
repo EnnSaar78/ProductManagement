@@ -1,14 +1,17 @@
 {
   "$schema": "node_modules/wrangler/config-schema.json",
   "name": "productmanagement",
-  "main": ".open-next/worker.js",
+  "main": "worker.ts",
   "compatibility_date": "2026-11-19",
-  "compatibility_flags": ["nodejs_compat", "global_fetch_strictly_public"],
+  "compatibility_flags": ["nodejs_compat"],
   "assets": {
     "directory": ".open-next/assets",
     "binding": "ASSETS"
   },
   "observability": { "enabled": true },
+  "vars": {
+    "MAPPING_USER_AGENT": "TelcoIntelBot/0.1 (internal market research; contact site owner via operator)"
+  },
   "services": [
     { "binding": "WORKER_SELF_REFERENCE", "service": "productmanagement" }
   ],
@@ -19,5 +22,15 @@
       "database_id": "1230d70a-7a1e-4fa0-9d43-7fa1b472a244",
       "migrations_dir": "drizzle"
     }
-  ]
+  ],
+  "workflows": [
+    {
+      "name": "productmanagement-map-company",
+      "binding": "MAP_COMPANY",
+      "class_name": "MapCompanyWorkflow"
+    }
+  ],
+  "triggers": {
+    "crons": ["17 3 * * *"]
+  }
 }

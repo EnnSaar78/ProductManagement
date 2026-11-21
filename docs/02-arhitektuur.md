@@ -1,6 +1,6 @@
 # Rakenduse arhitektuur
 
-**Staatus:** v0.2, 2026-11-21 (Cloudflare Workers + D1)
+**Staatus:** v0.3, 2026-11-21 (Cloudflare Workers + D1 + kaardistusmoodul)
 
 ## 1. Eesmärk ja põhimõtted
 
@@ -55,9 +55,54 @@ Kõik vabatekstid on eesti keeles. Väljad `*_original` hoiavad originaalkeelset
 - Esimene admin luuakse `/setup` lehel (ainult kui kasutajaid pole), iseregistreerimist ei ole.
 - Rate-limit sisselogimisele (5 katset / 15 min / e-post).
 
-## 5. Kogumise torujuhe (järgmine etapp)
+## 5. Kaardistusmoodul (kodulehtede kaardistus)
 
-Allikad → kogumine (fetch + tekstikoopia) → struktureerimine LLM-iga ühtsesse skeemi (kindluse hinne igal väljal) → inimese kinnitus → salvestus päritoluga → analüüs. Esimeses versioonis on sisestus käsitsi ja impordi kaudu; automaatne kogumine lisatakse eraldi tööna (`jobs/`), mis kirjutab samasse andmebaasi.
+### 5.1 Põhimõte
+
+Kaardistus laadib ettevõtte kodulehed alla **Workeris endas** (tavaline `fetch`), teisendab HTML-i puhastatud tekstiks ja laseb Claude'il teksti ühtsesse skeemi lugeda. Iga lehe tekstikoopia, räsi ja väljavõte salvestatakse (`mapping_pages`), igast lehest tekib allikas (`sources`), ja iga toote kirje viitab allikale. Nii säilib päritolu ja kordusjooksul saab muutumatu sisu väljavõtte taaskasutada ilma uue mudelikutseta.
+
+### 5.2 Miks mitte Claude'i enda veebitööriist
+
+Claude'i `web_fetch` server-tööriist oleks lihtsam, aga siis puuduks meil lehe tekstikoopia ja räsi (päritolu nõue), raskem oleks kontrollida mahtu ja kulu ning pole võimalik kordusjooksul muutumatuid lehti vahele jätta. Omaenda fetch + Claude struktureeritud väljund annab mõlemad.
+
+### 5.3 Mudelid
+
+| Samm | Vaikemudel | Effort | Põhjendus |
+|---|---|---|---|
+| URL-ide valik | `claude-opus-5-5` | low | odav klassifitseerimine, kvaliteet oluline õigete lehtede leidmiseks |
+| Lehe väljavõte (tooted, paketid, hinnad, tingimused) | `claude-opus-5-5` | medium | struktureeritud väljund Zod-skeemi järgi; täpsus hindade ja tingimuste puhul |
+| Toodete ühendamine üle lehtede | `claude-opus-5-5` | medium | dubleerimise vältimine, kategooria ja arhetüüpide määramine |
+| Süntees: canvas, pain–gain, SWOT | `claude-opus-5-5` | high | sisuline analüüs, kus mudeli võimekus on otsustav |
+
+Mudelid on ettevõtte seadistuses valitavad (`claude-opus-5-5`, `claude-sonnet-5-5`, `claude-haiku-5-5`). Kõik kutsed kasutavad adaptiivset mõtlemist (vaikimisi), `fallbacks: "default"` (turvaklassifikaatori keeldumise korral teine mudel) ja süsteemiprompti vahemälu.
+
+Kulu suurusjärk: keskmise lehe väljavõte ~15–30k sisendtokenit ja ~2–4k väljundtokenit; 30 lehe ja 10 toote kaardistus Opus 5.5-ga jääb tüüpiliselt 2–5 USD vahemikku. Töö lehel kuvatakse tokenite arv ja hinnang.
+
+### 5.4 Töövoog (Cloudflare Workflows)
+
+`MapCompanyWorkflow` sammud, igaüks kordustega ja ajalimiidiga:
+
+1. **discover** – seemne-URL-id, nende lingid (2 taset vihjete järgi), `sitemap.xml`; eelfilter; Claude valib kuni *max lehte*.
+2. **page:<id>** – iga leht: fetch → tekst → räsi; kui sama räsi on juba varem loetud, taaskasutatakse väljavõte; muidu Claude ekstraheerib tooted; luuakse allikas.
+3. **merge** – Claude ühendab lehtede leiud kanooniliseks tooteloendiks; tooted salvestatakse (`source_key` järgi uuendus või uus), paketid ja lisateenused asendatakse, väärtussõnumid (`origin=source`) asendatakse, arhetüübid seotakse, allikad seotakse toote külge. Toode märgitakse **ülevaatust vajavaks**.
+4. **synthesize:<id>** – iga toote kohta Claude koostab Business Model Canvase, Pain–Gain maatriksi ja SWOT-i; `origin=source` kirjed asendatakse, käsitsi lisatud kirjed jäävad alles.
+5. **finish** – töö staatus, ajastuse järgmine aeg.
+
+Käivitus: käsitsi ettevõtte kaardilt (nupp) või cron (`17 3 * * *` UTC), mis käivitab kõik seadistused, mille `next_run_at` on käes. Ühel ettevõttel saab korraga käia üks töö. Tööd saab katkestada (Workflow terminate).
+
+### 5.5 Tabelid
+
+- `mapping_configs` – seemne-URL-id, vihjed, välistused, segment, lehtede piir, regulaarsus päevades (0 = käsitsi), mudelid, keel, lubatud, viimane/järgmine aeg.
+- `mapping_jobs` – staatus, faas, Workflow-instants, seadistuse hetkkoopia, loendurid, tokenid, logi, viga.
+- `mapping_pages` – URL, staatus, HTTP, räsi, tekst, väljavõte (JSON), leitud toodete arv, allikas.
+- `products` sai väljad `source_key`, `review_status`, `last_mapped_at`.
+
+### 5.6 Saladused ja piirangud
+
+- `ANTHROPIC_API_KEY` on Workeri saladus (`npx wrangler secret put ANTHROPIC_API_KEY` või dashboard). Ilma selleta kaardistus ebaõnnestub selge veateatega.
+- `LLM_MOCK=1` (ainult arenduses) asendab mudeli deterministliku mockiga; `ALLOW_PRIVATE_FETCH=1` lubab testiks localhosti.
+- Töötab ainult serveripoolselt renderdatud HTML-iga. JavaScriptiga renderdatud lehtede jaoks on järgmine samm Cloudflare Browser Rendering.
+- Lehe tekst kärbitakse 60 000 märgini; kandidaat-URL-e antakse mudelile kuni 400.
 
 ## 6. Juurutus
 
