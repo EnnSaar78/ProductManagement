@@ -43,7 +43,8 @@ class RealLlm implements Llm {
   }
 
   private async call<S extends z.ZodType>(model: string, effort: "low" | "medium" | "high", system: string, user: string, schema: S, maxTokens = 16000): Promise<LlmResult<z.infer<S>>> {
-    const res = await this.client.beta.messages.parse({
+    // Voogedastus: suured väljundid (mõtlemine + JSON) ei jookse HTTP ajalimiiti
+    const stream = this.client.beta.messages.stream({
       model,
       max_tokens: maxTokens,
       betas: ["server-side-fallback-2026-07-01"],
@@ -52,9 +53,18 @@ class RealLlm implements Llm {
       messages: [{ role: "user", content: user }],
       output_config: { format: betaZodOutputFormat(schema), effort },
     });
+    let res: Awaited<ReturnType<typeof stream.finalMessage>>;
+    try {
+      res = await stream.finalMessage();
+    } catch (e) {
+      // SDK viskab parsimisvea enne, kui saame stop_reason'it vaadata: anna selgem teade
+      const msg = e instanceof Error ? e.message : String(e);
+      if (/Failed to parse structured output|Unterminated|Unexpected end/i.test(msg)) throw new Error(`Väljund katkes enne JSON-i lõppu (max_tokens ${maxTokens} on liiga väike või sisend liiga suur): ${msg.slice(0, 160)}`);
+      throw e;
+    }
     const usage = { input: (res.usage.input_tokens ?? 0) + (res.usage.cache_read_input_tokens ?? 0) + (res.usage.cache_creation_input_tokens ?? 0), output: res.usage.output_tokens ?? 0 };
     if (res.stop_reason === "refusal") throw new Error(`Mudel keeldus: ${res.stop_details?.category ?? "?"}`);
-    if (res.stop_reason === "max_tokens") throw new Error("Vastus katkes max_tokens piiril");
+    if (res.stop_reason === "max_tokens") throw new Error(`Vastus katkes max_tokens (${maxTokens}) piiril`);
     if (!res.parsed_output) throw new Error("Struktureeritud väljundit ei õnnestunud parsida");
     return { data: res.parsed_output as z.infer<S>, usage };
   }
@@ -69,7 +79,7 @@ class RealLlm implements Llm {
       "",
       list,
     ].join("\n");
-    return this.call(this.extractModel, "low", systemBase(ctx), user, UrlSelectionSchema, 8000);
+    return this.call(this.extractModel, "low", systemBase(ctx), user, UrlSelectionSchema, 16000);
   }
 
   extractPage(ctx: CompanyContext, url: string, title: string, text: string, categories: string) {
@@ -86,7 +96,7 @@ class RealLlm implements Llm {
       "--- LEHE TEKST ---",
       text,
     ].join("\n");
-    return this.call(this.extractModel, "medium", systemBase(ctx), user, PageExtractionSchema, 24000);
+    return this.call(this.extractModel, "medium", systemBase(ctx), user, PageExtractionSchema, 40000);
   }
 
   mergeProducts(ctx: CompanyContext, pages: { index: number; url: string; extraction: PageExtraction }[], categories: string, archetypes: string) {
@@ -96,7 +106,8 @@ class RealLlm implements Llm {
       "- sama toode mitmel lehel liida kokku (täienda pakette, lisateenuseid, sõnumeid; ära dubleeri);",
       "- hoia tooted eraldi, kui need on päriselt erinevad pakkumised;",
       "- jäta välja kirjed, mis ei ole müüdavad tooted (uudised, üldlehed, confidence alla 0,4);",
-      "- source_page_indexes loetleb lehtede indeksid, kust toode pärineb;",
+      "- source_page_indexes loetleb lehtede indeksid, kust toode pärineb; kui sisendtoodetel on juba source_page_indexes olemas, kasuta neid originaalväärtusi;",
+      "- hoia väljund kompaktne: included ja components lühikeste fraasidena, mitte lausetena;",
       "- archetype_codes vali loendist:",
       archetypes,
       "- category_code vali loendist:",
@@ -104,7 +115,7 @@ class RealLlm implements Llm {
       "",
       body,
     ].join("\n");
-    return this.call(this.extractModel, "medium", systemBase(ctx), user, MergeResultSchema, 32000);
+    return this.call(this.extractModel, "medium", systemBase(ctx), user, MergeResultSchema, 64000);
   }
 
   synthesize(ctx: CompanyContext, productJson: string) {
@@ -118,7 +129,7 @@ class RealLlm implements Llm {
       "--- TOODE ---",
       productJson,
     ].join("\n");
-    return this.call(this.synthesisModel, "high", systemBase(ctx), user, SynthesisSchema, 16000);
+    return this.call(this.synthesisModel, "high", systemBase(ctx), user, SynthesisSchema, 32000);
   }
 }
 

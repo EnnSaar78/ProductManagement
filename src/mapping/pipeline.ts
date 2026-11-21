@@ -238,8 +238,7 @@ export async function mergeAndUpsert(env: MappingEnv, jobId: string): Promise<st
   }
   const cats = await categoriesText(db, c.config.segment);
   const arch = await archetypesText(db);
-  const merged = await c.llm.mergeProducts(c.ctx, withProducts.map(({ index, url, extraction }) => ({ index, url, extraction })), cats, arch);
-  await addUsage(db, jobId, merged.usage);
+  const merged = await mergeInChunks(c, withProducts.map(({ index, url, extraction }) => ({ index, url, extraction })), cats, arch);
   await log(db, jobId, "info", `Ühendatud ${merged.data.products.length} toodet (${found} leidu)`);
 
   const categories = await db.select().from(schema.categories).all();
@@ -307,6 +306,50 @@ export async function mergeAndUpsert(env: MappingEnv, jobId: string): Promise<st
   await db.update(schema.mappingJobs).set({ productsCreated: created, productsUpdated: updated, phase: "synthesize" }).where(eq(schema.mappingJobs.id, jobId)).run();
   await log(db, jobId, "info", `Salvestatud: ${created} uut, ${updated} uuendatud`);
   return productIds;
+}
+
+/** Suur leiuhulk ühendatakse osade kaupa (<= MERGE_CHUNK leidu korraga), seejärel lõplik ühendamine. */
+const MERGE_CHUNK = 22;
+async function mergeInChunks(c: JobContext, pages: { index: number; url: string; extraction: PageExtraction }[], cats: string, arch: string) {
+  const total = pages.reduce((n, p) => n + p.extraction.products.length, 0);
+  if (total <= MERGE_CHUNK + 6) {
+    const r = await c.llm.mergeProducts(c.ctx, pages, cats, arch);
+    await addUsage(c.db, c.jobId, r.usage);
+    return r;
+  }
+  const groups: (typeof pages)[] = [];
+  let cur: typeof pages = [];
+  let n = 0;
+  for (const p of pages) {
+    if (n > 0 && n + p.extraction.products.length > MERGE_CHUNK) {
+      groups.push(cur);
+      cur = [];
+      n = 0;
+    }
+    cur.push(p);
+    n += p.extraction.products.length;
+  }
+  if (cur.length) groups.push(cur);
+  await log(c.db, c.jobId, "info", `Ühendamine ${groups.length} osas (${total} leidu)`);
+  const validIdx = new Set(pages.map((p) => p.index));
+  const pseudo: { index: number; url: string; extraction: PageExtraction; orig: number[] }[] = [];
+  for (let g = 0; g < groups.length; g++) {
+    const r = await c.llm.mergeProducts(c.ctx, groups[g], cats, arch);
+    await addUsage(c.db, c.jobId, r.usage);
+    const orig = groups[g].map((p) => p.index);
+    pseudo.push({ index: 1000 + g, url: `osa ${g + 1}: ${groups[g].map((p) => p.url).join(", ")}`, extraction: { page_kind: "category_overview", notes: "", products: r.data.products }, orig });
+    await log(c.db, c.jobId, "info", `Osa ${g + 1}/${groups.length}: ${r.data.products.length} toodet`);
+  }
+  const final = await c.llm.mergeProducts(c.ctx, pseudo.map(({ index, url, extraction }) => ({ index, url, extraction })), cats, arch);
+  await addUsage(c.db, c.jobId, final.usage);
+  for (const mp of final.data.products) {
+    const real = mp.source_page_indexes.filter((i) => validIdx.has(i));
+    if (real.length === 0) {
+      const fromPseudo = mp.source_page_indexes.flatMap((i) => pseudo.find((p) => p.index === i)?.orig ?? []);
+      mp.source_page_indexes = fromPseudo.length ? fromPseudo : pseudo.flatMap((p) => p.orig);
+    } else mp.source_page_indexes = real;
+  }
+  return final;
 }
 
 function productFields(mp: MergedProduct, categoryId: string) {
