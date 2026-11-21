@@ -2,7 +2,7 @@
 
 **Roll:** äriarenduse juht / toote- ja teenusearenduse partner
 **Eesmärk:** ühtne raamistik, mille alusel kaardistada telekommunikatsiooni- ja IT-ettevõtteid, nende tooteid ja ärimudeleid arenenud riikides ning sõeluda välja olulised signaalid ja trendid.
-**Staatus:** ettepanek (v0.1), 2026-11-21
+**Staatus:** kinnitatud struktuur (v0.2), 2026-11-21
 
 ---
 
@@ -340,25 +340,21 @@ Näidispäringud, mis määravad andmemudeli nõuded:
 
 ---
 
-## 11. Soovitatav alustamise ulatus (MVP)
+## 11. Esimese etapi ulatus (kinnitatud)
 
-Et struktuur end tõestaks enne laiendamist:
-
-| Dimensioon | MVP ulatus |
+| Dimensioon | Esimene etapp |
 |---|---|
-| Riigid | Soome, Rootsi, Holland, Saksamaa, Suurbritannia (+ Eesti võrdlusbaasina) |
-| Ettevõtted | turuliider + 1 challenger igas riigis (nt Elisa + DNA, Telia + Tele2, KPN + Odido, DT + 1&1, BT/EE + VodafoneThree) |
-| Kategooriad | C-MOB, C-FMC, B-CON (+ B-SEC kui B2B fookus on oluline) |
-| Analüüsiplokid | kõik viis nõutud (canvas, pain–gain, SWOT, sõnumid, KPI-d) + hinnaarhitektuur |
-| Allikad | tootelehed, viimane aastaaruanne, regulaatori turuülevaade, 2 analüütikuraportit kategooria kohta |
+| Segment | **B2B.** B2C kategooriad jäävad taksonoomiasse olemas, kuid kaardistus algab B2B-st; B2C lisatakse hiljem |
+| Ettevõtted | **Telekommunikatsiooni operaatorid ja nende IT-harud** (nt Telia Cygate, Elisa Santa Monica, T-Systems, Orange Business). Puhtad IT-integraatorid jäävad hilisemaks võrdlusbaasiks |
+| Riigid | Soome, Rootsi, Norra, Taani, Holland, Saksamaa, Suurbritannia, Eesti võrdlusbaasina; laieneb hiljem |
+| Kategooriad | B-MOB, B-CON, B-P5G, B-UCC, B-CLD, B-SEC, B-WRK, B-DIG, B-WHS |
+| Analüüsiplokid | canvas, pain–gain, SWOT, väärtussõnumid, KPI-d, hinnaarhitektuur, "mida see meile tähendab" |
+| Allikad | tootelehed, viimane aastaaruanne, regulaatori turuülevaade, analüütikuraportid kategooria kohta |
 
-Pärast MVP-d laieneb kaardistus ülejäänud riikidele ja B2B/IT-kategooriatele.
+## 12. Kinnitatud otsused
 
----
-
-## 12. Lahtised otsused
-
-1. **Fookuse tasakaal:** kas B2C ja B2B on võrdse kaaluga või on üks prioriteet esimeses etapis?
-2. **IT-teenuste piir:** kas kaardistame ainult operaatorite IT-harusid või ka puhtaid IT-integraatoreid (nt Tietoevry, Atea) võrdlusbaasina?
-3. **Keel:** kas tootekaardid hoitakse eesti keeles tõlgituna või originaalkeeles + eesti kokkuvõte? (Ettepanek: originaal + eesti kokkuvõte, et sõnumite analüüs ei kaotaks nüansse.)
-4. **Kinnituse tase:** kui palju automaatselt tuletatud infot avaldatakse ilma inimese kinnituseta?
+1. **Fookus:** esimeses etapis B2B, B2C lisatakse hiljem.
+2. **Ettevõtete ring:** esmalt telekommunikatsiooni operaatorid, nende IT-harud ja tooted.
+3. **Keel:** tootekaardid koostatakse **eesti keeles**, et sisu oleks kiiresti haaratav. Väärtuspakkumise peasõnum säilitatakse lisaks originaalkeeles, et sõnumianalüüs ei kaotaks nüansse.
+4. **Ligipääs:** sait ei ole kunagi avalik. Ligipääs on piiratud e-posti ja parooliga, kasutajaid lisab administraator (iseregistreerimist ei ole).
+5. **Mitmekeelsus:** kasutajaliides on mitmekeelne (alguses eesti ja inglise), et tulevikus jagada süsteemi ka inimestega, kes eesti keelt ei räägi. Sisu (tootekaardid) on eesti keeles; sisu tõlkimine on hilisem etapp.
