@@ -1,5 +1,8 @@
 {
-  "app": { "name": "Telco Intel", "tagline": "Telekomi ja IT ärimudelite kaardistus" },
+  "app": {
+    "name": "Telco Intel",
+    "tagline": "Telekomi ja IT ärimudelite kaardistus"
+  },
   "nav": {
     "dashboard": "Ülevaade",
     "markets": "Turud",
@@ -63,7 +66,13 @@
   },
   "dashboard": {
     "title": "Ülevaade",
-    "stats": { "markets": "Turud", "companies": "Ettevõtted", "products": "Tooted", "signals": "Signaalid", "sources": "Allikad" },
+    "stats": {
+      "markets": "Turud",
+      "companies": "Ettevõtted",
+      "products": "Tooted",
+      "signals": "Signaalid",
+      "sources": "Allikad"
+    },
     "latestSignals": "Viimased signaalid",
     "latestProducts": "Viimati lisatud tooted",
     "scopeNote": "Esimene etapp: B2B teenused, operaatorid ja nende IT-harud."
@@ -148,7 +157,12 @@
     "technology": "Tehnoloogilised võimaldajad",
     "partners": "Partnerid",
     "archetypes": "Ärimudeli arhetüübid",
-    "statuses": { "new": "Uus", "active": "Aktiivne", "discontinued": "Lõpetatud", "sample": "Näidis" },
+    "statuses": {
+      "new": "Uus",
+      "active": "Aktiivne",
+      "discontinued": "Lõpetatud",
+      "sample": "Näidis"
+    },
     "pricingModels": {
       "subscription": "Kuutasu",
       "usage": "Kasutuspõhine",
@@ -181,7 +195,14 @@
       "sla": "SLA",
       "included": "Mis on sees",
       "attributes": "Lisaväljad (JSON)",
-      "units": { "month": "kuus", "user_month": "kasutaja/kuus", "site_month": "sait/kuus", "gb": "GB", "one_off": "ühekordne", "year": "aastas" }
+      "units": {
+        "month": "kuus",
+        "user_month": "kasutaja/kuus",
+        "site_month": "sait/kuus",
+        "gb": "GB",
+        "one_off": "ühekordne",
+        "year": "aastas"
+      }
     },
     "canvas": {
       "hint": "Allikast tuletatud kirjed on märgitud eraldi. Lisa oma täiendused igasse plokki.",
@@ -200,7 +221,11 @@
     "paingain": {
       "hint": "Kliendi tööd, valud ja kasud vs toote vastus. Sobivuse hinne 0–3: 0 = ei kata, 3 = katab täielikult.",
       "kind": "Liik",
-      "kinds": { "job": "Töö", "pain": "Valu", "gain": "Kasu" },
+      "kinds": {
+        "job": "Töö",
+        "pain": "Valu",
+        "gain": "Kasu"
+      },
       "customerText": "Kliendi töö / valu / kasu",
       "productResponse": "Toote vastus (leevendaja / kasulooja)",
       "fit": "Sobivus",
@@ -209,18 +234,43 @@
     },
     "swot": {
       "hint": "Tugevused ja nõrkused on toote sisemised; võimalused ja ohud tulenevad turust.",
-      "quadrants": { "strength": "Tugevused", "weakness": "Nõrkused", "opportunity": "Võimalused", "threat": "Ohud" }
+      "quadrants": {
+        "strength": "Tugevused",
+        "weakness": "Nõrkused",
+        "opportunity": "Võimalused",
+        "threat": "Ohud"
+      }
     },
     "messages": {
       "hint": "Sõnum eesti keeles, originaaltekst säilitatakse analüüsiks.",
       "kind": "Sõnumi liik",
-      "kinds": { "headline": "Peasõnum", "supporting": "Toetav sõnum", "proof": "Tõend", "differentiator": "Eristusväide", "tagline": "Tunnuslause" },
+      "kinds": {
+        "headline": "Peasõnum",
+        "supporting": "Toetav sõnum",
+        "proof": "Tõend",
+        "differentiator": "Eristusväide",
+        "tagline": "Tunnuslause"
+      },
       "text": "Sõnum (eesti keeles)",
       "originalText": "Originaaltekst",
       "tone": "Toon",
-      "tones": { "simplicity": "Lihtsus", "freedom": "Vabadus", "security": "Turvalisus", "price": "Hind", "quality": "Kvaliteet", "sustainability": "Jätkusuutlikkus", "partnership": "Partnerlus", "innovation": "Innovatsioon" },
+      "tones": {
+        "simplicity": "Lihtsus",
+        "freedom": "Vabadus",
+        "security": "Turvalisus",
+        "price": "Hind",
+        "quality": "Kvaliteet",
+        "sustainability": "Jätkusuutlikkus",
+        "partnership": "Partnerlus",
+        "innovation": "Innovatsioon"
+      },
       "messageType": "Sõnumi tüüp",
-      "messageTypes": { "functional": "Funktsionaalne", "emotional": "Emotsionaalne", "economic": "Majanduslik", "social": "Sotsiaalne" }
+      "messageTypes": {
+        "functional": "Funktsionaalne",
+        "emotional": "Emotsionaalne",
+        "economic": "Majanduslik",
+        "social": "Sotsiaalne"
+      }
     },
     "kpis": {
       "hint": "Toote tasandi näitajad. Hinnangud märgi eraldi ja lisa meetod.",
@@ -281,7 +331,11 @@
     "impact": "Mõju meile",
     "confidence": "Kindlus",
     "horizon": "Horisont",
-    "horizons": { "now": "Praegu", "near": "1–2 aastat", "far": "3+ aastat" },
+    "horizons": {
+      "now": "Praegu",
+      "near": "1–2 aastat",
+      "far": "3+ aastat"
+    },
     "soWhat": "So what – mida see meile tähendab",
     "tags": "Trenditeemad",
     "score": "Skoor",
@@ -330,12 +384,27 @@
     "title": "Kasutajad",
     "new": "Lisa kasutaja",
     "role": "Roll",
-    "roles": { "admin": "Administraator", "editor": "Toimetaja", "viewer": "Lugeja" },
+    "roles": {
+      "admin": "Administraator",
+      "editor": "Toimetaja",
+      "viewer": "Lugeja"
+    },
     "active": "Aktiivne",
     "lastLogin": "Viimati sisse logitud",
     "password": "Parool (vähemalt 10 märki)",
     "deactivate": "Deaktiveeri",
     "activate": "Aktiveeri",
-    "resetPassword": "Uus parool"
+    "resetPassword": "Uus parool",
+    "seed": "Lisa puuduvad alusandmed",
+    "seedDone": "Alusandmed lisatud"
+  },
+  "setup": {
+    "title": "Esmakäivitus",
+    "subtitle": "Kasutajaid veel ei ole. Loo esimene administraator. See leht töötab ainult tühja kasutajate tabeliga.",
+    "name": "Nimi",
+    "email": "E-post",
+    "password": "Parool (vähemalt 10 märki)",
+    "seed": "Lisa alusandmed (turud, ettevõtted, kategooriad, arhetüübid, trenditeemad)",
+    "submit": "Loo administraator ja alusta"
   }
 }

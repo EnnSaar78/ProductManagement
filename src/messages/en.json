@@ -1,5 +1,8 @@
 {
-  "app": { "name": "Telco Intel", "tagline": "Telecom and IT business model mapping" },
+  "app": {
+    "name": "Telco Intel",
+    "tagline": "Telecom and IT business model mapping"
+  },
   "nav": {
     "dashboard": "Overview",
     "markets": "Markets",
@@ -63,7 +66,13 @@
   },
   "dashboard": {
     "title": "Overview",
-    "stats": { "markets": "Markets", "companies": "Companies", "products": "Products", "signals": "Signals", "sources": "Sources" },
+    "stats": {
+      "markets": "Markets",
+      "companies": "Companies",
+      "products": "Products",
+      "signals": "Signals",
+      "sources": "Sources"
+    },
     "latestSignals": "Latest signals",
     "latestProducts": "Recently added products",
     "scopeNote": "Phase 1: B2B services, operators and their IT arms."
@@ -148,7 +157,12 @@
     "technology": "Technology enablers",
     "partners": "Partners",
     "archetypes": "Business model archetypes",
-    "statuses": { "new": "New", "active": "Active", "discontinued": "Discontinued", "sample": "Sample" },
+    "statuses": {
+      "new": "New",
+      "active": "Active",
+      "discontinued": "Discontinued",
+      "sample": "Sample"
+    },
     "pricingModels": {
       "subscription": "Subscription",
       "usage": "Usage-based",
@@ -181,7 +195,14 @@
       "sla": "SLA",
       "included": "Included",
       "attributes": "Extra fields (JSON)",
-      "units": { "month": "per month", "user_month": "per user/month", "site_month": "per site/month", "gb": "per GB", "one_off": "one-off", "year": "per year" }
+      "units": {
+        "month": "per month",
+        "user_month": "per user/month",
+        "site_month": "per site/month",
+        "gb": "per GB",
+        "one_off": "one-off",
+        "year": "per year"
+      }
     },
     "canvas": {
       "hint": "Entries derived from sources are marked separately. Add your own notes to any block.",
@@ -200,7 +221,11 @@
     "paingain": {
       "hint": "Customer jobs, pains and gains vs the product's response. Fit score 0–3: 0 = not covered, 3 = fully covered.",
       "kind": "Kind",
-      "kinds": { "job": "Job", "pain": "Pain", "gain": "Gain" },
+      "kinds": {
+        "job": "Job",
+        "pain": "Pain",
+        "gain": "Gain"
+      },
       "customerText": "Customer job / pain / gain",
       "productResponse": "Product response (reliever / creator)",
       "fit": "Fit",
@@ -209,18 +234,43 @@
     },
     "swot": {
       "hint": "Strengths and weaknesses are internal to the product; opportunities and threats come from the market.",
-      "quadrants": { "strength": "Strengths", "weakness": "Weaknesses", "opportunity": "Opportunities", "threat": "Threats" }
+      "quadrants": {
+        "strength": "Strengths",
+        "weakness": "Weaknesses",
+        "opportunity": "Opportunities",
+        "threat": "Threats"
+      }
     },
     "messages": {
       "hint": "Message in Estonian; the original text is kept for analysis.",
       "kind": "Message kind",
-      "kinds": { "headline": "Headline", "supporting": "Supporting message", "proof": "Proof point", "differentiator": "Differentiator", "tagline": "Tagline" },
+      "kinds": {
+        "headline": "Headline",
+        "supporting": "Supporting message",
+        "proof": "Proof point",
+        "differentiator": "Differentiator",
+        "tagline": "Tagline"
+      },
       "text": "Message (Estonian)",
       "originalText": "Original text",
       "tone": "Tone",
-      "tones": { "simplicity": "Simplicity", "freedom": "Freedom", "security": "Security", "price": "Price", "quality": "Quality", "sustainability": "Sustainability", "partnership": "Partnership", "innovation": "Innovation" },
+      "tones": {
+        "simplicity": "Simplicity",
+        "freedom": "Freedom",
+        "security": "Security",
+        "price": "Price",
+        "quality": "Quality",
+        "sustainability": "Sustainability",
+        "partnership": "Partnership",
+        "innovation": "Innovation"
+      },
       "messageType": "Message type",
-      "messageTypes": { "functional": "Functional", "emotional": "Emotional", "economic": "Economic", "social": "Social" }
+      "messageTypes": {
+        "functional": "Functional",
+        "emotional": "Emotional",
+        "economic": "Economic",
+        "social": "Social"
+      }
     },
     "kpis": {
       "hint": "Product-level indicators. Mark estimates and state the method.",
@@ -281,7 +331,11 @@
     "impact": "Impact on us",
     "confidence": "Confidence",
     "horizon": "Horizon",
-    "horizons": { "now": "Now", "near": "1–2 years", "far": "3+ years" },
+    "horizons": {
+      "now": "Now",
+      "near": "1–2 years",
+      "far": "3+ years"
+    },
     "soWhat": "So what – what it means for us",
     "tags": "Trend themes",
     "score": "Score",
@@ -330,12 +384,27 @@
     "title": "Users",
     "new": "Add user",
     "role": "Role",
-    "roles": { "admin": "Administrator", "editor": "Editor", "viewer": "Viewer" },
+    "roles": {
+      "admin": "Administrator",
+      "editor": "Editor",
+      "viewer": "Viewer"
+    },
     "active": "Active",
     "lastLogin": "Last login",
     "password": "Password (at least 10 characters)",
     "deactivate": "Deactivate",
     "activate": "Activate",
-    "resetPassword": "New password"
+    "resetPassword": "New password",
+    "seed": "Load missing reference data",
+    "seedDone": "Reference data loaded"
+  },
+  "setup": {
+    "title": "First-run setup",
+    "subtitle": "There are no users yet. Create the first administrator. This page only works while the users table is empty.",
+    "name": "Name",
+    "email": "Email",
+    "password": "Password (at least 10 characters)",
+    "seed": "Load reference data (markets, companies, categories, archetypes, trend themes)",
+    "submit": "Create administrator and start"
   }
 }

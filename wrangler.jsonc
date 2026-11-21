@@ -1,0 +1,23 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "productmanagement",
+  "main": ".open-next/worker.js",
+  "compatibility_date": "2026-11-19",
+  "compatibility_flags": ["nodejs_compat", "global_fetch_strictly_public"],
+  "assets": {
+    "directory": ".open-next/assets",
+    "binding": "ASSETS"
+  },
+  "observability": { "enabled": true },
+  "services": [
+    { "binding": "WORKER_SELF_REFERENCE", "service": "productmanagement" }
+  ],
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "productmanagement-db",
+      "database_id": "1230d70a-7a1e-4fa0-9d43-7fa1b472a244",
+      "migrations_dir": "drizzle"
+    }
+  ]
+}

@@ -12,8 +12,8 @@ export default async function SignalsPage() {
   const t = await getTranslations("signals");
   const tc = await getTranslations("common");
   const locale = await getLocale();
-  const signals = listSignals();
-  const radar = trendRadar().filter((r) => r.n > 0);
+  const signals = (await listSignals());
+  const radar = (await trendRadar()).filter((r) => r.n > 0);
   const tn = (x: { nameEt: string; nameEn: string }) => (locale === "en" ? x.nameEn : x.nameEt);
   return (
     <>

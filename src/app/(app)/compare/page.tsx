@@ -9,11 +9,11 @@ export default async function ComparePage({ searchParams }: { searchParams: Prom
   const tc = await getTranslations("common");
   const locale = await getLocale();
   const sp = await searchParams;
-  const categories = listCategories();
+  const categories = (await listCategories());
   const categoryId = sp.category || "";
-  const candidates = categoryId ? listProducts({ categoryId }) : [];
+  const candidates = categoryId ? (await listProducts({ categoryId })) : [];
   const ids = (Array.isArray(sp.ids) ? sp.ids : sp.ids ? [sp.ids] : []).slice(0, 6);
-  const selected = ids.map((id) => getProductFull(id)).filter((x): x is NonNullable<typeof x> => !!x);
+  const selected = (await Promise.all(ids.map((id) => getProductFull(id)))).filter((x): x is NonNullable<typeof x> => !!x);
   const cname = (c: { nameEt: string; nameEn: string }) => (locale === "en" ? c.nameEn : c.nameEt);
   const fmt = (n: number | null | undefined) => (n == null ? tc("none") : n.toLocaleString(locale, { maximumFractionDigits: 2 }));
 

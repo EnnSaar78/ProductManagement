@@ -11,9 +11,9 @@ export default async function ProductsPage({ searchParams }: { searchParams: Pro
   const locale = await getLocale();
   const sp = await searchParams;
   const segment = sp.segment === "B2C" ? "B2C" : sp.segment === "" ? undefined : "B2B";
-  const categories = listCategories();
-  const markets = listMarkets();
-  const rows = listProducts({ categoryId: sp.category || undefined, marketId: sp.market || undefined, segment }).filter(
+  const categories = (await listCategories());
+  const markets = (await listMarkets());
+  const rows = (await listProducts({ categoryId: sp.category || undefined, marketId: sp.market || undefined, segment })).filter(
     (p) => !sp.q || p.name.toLowerCase().includes(sp.q.toLowerCase()) || p.companyName.toLowerCase().includes(sp.q.toLowerCase()),
   );
   const cname = (p: { categoryNameEt: string; categoryNameEn: string }) => (locale === "en" ? p.categoryNameEn : p.categoryNameEt);

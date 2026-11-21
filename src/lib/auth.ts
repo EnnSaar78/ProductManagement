@@ -2,7 +2,6 @@ import "server-only";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { and, eq, gt } from "drizzle-orm";
-import { createHash, randomBytes } from "node:crypto";
 import { db, schema } from "@/db";
 import { cache } from "react";
 
@@ -16,14 +15,20 @@ export type SessionUser = {
   role: "admin" | "editor" | "viewer";
 };
 
-function hashToken(token: string) {
-  return createHash("sha256").update(token).digest("hex");
+async function hashToken(token: string) {
+  const digest = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(token));
+  return Array.from(new Uint8Array(digest), (b) => b.toString(16).padStart(2, "0")).join("");
 }
 
-export function createSession(userId: string) {
-  const token = randomBytes(32).toString("base64url");
+function randomToken() {
+  const bytes = crypto.getRandomValues(new Uint8Array(32));
+  return btoa(String.fromCharCode(...bytes)).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
+}
+
+export async function createSession(userId: string) {
+  const token = randomToken();
   const expiresAt = new Date(Date.now() + SESSION_DAYS * 86400_000).toISOString();
-  db.insert(schema.sessions).values({ id: hashToken(token), userId, expiresAt }).run();
+  await db.insert(schema.sessions).values({ id: await hashToken(token), userId, expiresAt }).run();
   return { token, expiresAt };
 }
 
@@ -41,7 +46,7 @@ export async function setSessionCookie(token: string, expiresAt: string) {
 export async function destroySession() {
   const store = await cookies();
   const token = store.get(SESSION_COOKIE)?.value;
-  if (token) db.delete(schema.sessions).where(eq(schema.sessions.id, hashToken(token))).run();
+  if (token) await db.delete(schema.sessions).where(eq(schema.sessions.id, await hashToken(token))).run();
   store.delete(SESSION_COOKIE);
 }
 
@@ -49,8 +54,7 @@ export const getCurrentUser = cache(async (): Promise<SessionUser | null> => {
   const store = await cookies();
   const token = store.get(SESSION_COOKIE)?.value;
   if (!token) return null;
-  const row = db
-    .select({
+  const row = await db.select({
       id: schema.users.id,
       email: schema.users.email,
       name: schema.users.name,
@@ -59,7 +63,7 @@ export const getCurrentUser = cache(async (): Promise<SessionUser | null> => {
     })
     .from(schema.sessions)
     .innerJoin(schema.users, eq(schema.users.id, schema.sessions.userId))
-    .where(and(eq(schema.sessions.id, hashToken(token)), gt(schema.sessions.expiresAt, new Date().toISOString())))
+    .where(and(eq(schema.sessions.id, await hashToken(token)), gt(schema.sessions.expiresAt, new Date().toISOString())))
     .get();
   if (!row || !row.active) return null;
   return { id: row.id, email: row.email, name: row.name, role: row.role };

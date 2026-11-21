@@ -5,8 +5,8 @@ import { listCompanies, listMarkets } from "@/lib/queries";
 
 export default async function MarketsPage() {
   const t = await getTranslations("markets");
-  const markets = listMarkets();
-  const companies = listCompanies();
+  const markets = (await listMarkets());
+  const companies = (await listCompanies());
   const counts = new Map<string, number>();
   for (const c of companies) counts.set(c.marketId, (counts.get(c.marketId) ?? 0) + 1);
   return (

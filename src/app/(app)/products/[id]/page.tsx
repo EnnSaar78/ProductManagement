@@ -24,7 +24,7 @@ export default async function ProductPage({ params, searchParams }: { params: Pr
   const { id } = await params;
   const { tab: rawTab } = await searchParams;
   const tab: Tab = (TABS as readonly string[]).includes(rawTab ?? "") ? (rawTab as Tab) : "overview";
-  const full = getProductFull(id);
+  const full = (await getProductFull(id));
   if (!full) notFound();
   const { product, company, market, category, plans, addons, archetypes, canvas, painGain, swot, messages, kpis, insight, sources, srcMap } = full;
   const t = await getTranslations("products");

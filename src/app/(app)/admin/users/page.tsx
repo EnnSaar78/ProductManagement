@@ -2,19 +2,28 @@ import { asc } from "drizzle-orm";
 import { getTranslations } from "next-intl/server";
 import { db, schema } from "@/db";
 import { Card, Field, PageHeader } from "@/components/ui";
-import { createUser, resetUserPassword, setUserActive, setUserRole } from "@/lib/actions/content";
+import { createUser, resetUserPassword, seedReference, setUserActive, setUserRole } from "@/lib/actions/content";
 import { requireRole } from "@/lib/auth";
 
 const ROLES = ["admin", "editor", "viewer"] as const;
 
-export default async function UsersPage() {
+export default async function UsersPage({ searchParams }: { searchParams: Promise<{ seeded?: string }> }) {
+  const { seeded } = await searchParams;
   const me = await requireRole("admin");
   const t = await getTranslations("users");
   const tc = await getTranslations("common");
-  const users = db.select().from(schema.users).orderBy(asc(schema.users.email)).all();
+  const users = await db.select().from(schema.users).orderBy(asc(schema.users.email)).all();
   return (
     <>
-      <PageHeader title={t("title")} />
+      <PageHeader
+        title={t("title")}
+        actions={
+          <form action={seedReference}>
+            <button className="btn-secondary">{t("seed")}</button>
+          </form>
+        }
+      />
+      {seeded && <p className="mb-4 rounded bg-emerald-50 p-2 text-sm text-emerald-800">{t("seedDone")}</p>}
       <Card title={t("new")} className="mb-4">
         <form action={createUser} className="grid gap-2 md:grid-cols-5">
           <Field label="E-post"><input name="email" type="email" required /></Field>

@@ -2,9 +2,10 @@
  * Alusandmed: turud, ettevõtted (avalikud faktid: nimi, riik, tüüp, veebileht),
  * tootekategooriate taksonoomia, ärimudeli arhetüübid ja trenditeemad.
  * Tooteid, KPI-sid ega hindu ei seemneta: need tulevad kaardistusest koos allikaviitega.
+ * ID-d on deterministlikud, nii et seemnet saab korduvalt jooksutada (INSERT ... ON CONFLICT DO NOTHING).
  */
-import { db, newId, schema } from "./index";
-import { eq } from "drizzle-orm";
+import type { Db } from "./index";
+import * as schema from "./schema";
 
 type MarketSeed = { code: string; name: string; region: string; currency: string; regulator: string; priority: number };
 const MARKETS: MarketSeed[] = [
@@ -196,68 +197,65 @@ const TRENDS = [
   ["network_api", "Võrgu-API-d (CAMARA, Open Gateway)", "Network APIs (CAMARA, Open Gateway)"],
 ] as const;
 
-function upsertMarkets() {
-  const ids = new Map<string, string>();
-  for (const m of MARKETS) {
-    const ex = db.select().from(schema.markets).where(eq(schema.markets.code, m.code)).get();
-    if (ex) {
-      ids.set(m.code, ex.id);
-      continue;
+const slug = (s: string) =>
+  s
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-|-$/g, "");
+
+export const marketId = (code: string) => `mkt_${code.toLowerCase()}`;
+export const companyId = (name: string) => `co_${slug(name)}`;
+
+export async function seedReferenceData(db: Db) {
+  const chunk = <T>(arr: T[], n: number) => Array.from({ length: Math.ceil(arr.length / n) }, (_, i) => arr.slice(i * n, i * n + n));
+  type Stmt = Parameters<Db["batch"]>[0][number];
+  const run = async (stmts: Stmt[]) => {
+    for (const group of chunk(stmts, 25)) {
+      // D1 batch: üks võrgupäring mitme lause kohta
+      await db.batch(group as unknown as [Stmt, ...Stmt[]]);
     }
-    const id = newId();
-    db.insert(schema.markets).values({ id, code: m.code, name: m.name, region: m.region, currency: m.currency, regulator: m.regulator, priority: m.priority }).run();
-    ids.set(m.code, id);
-  }
-  return ids;
-}
+  };
 
-function upsertCompanies(marketIds: Map<string, string>) {
-  const byName = new Map<string, string>();
-  for (const c of COMPANIES) {
-    const marketId = marketIds.get(c.market)!;
-    const ex = db.select().from(schema.companies).where(eq(schema.companies.name, c.name)).get();
-    if (ex) {
-      byName.set(c.name, ex.id);
-      continue;
-    }
-    const id = newId();
-    db.insert(schema.companies).values({ id, marketId, name: c.name, type: c.type, website: c.website, group: c.group, brands: c.brands }).run();
-    byName.set(c.name, id);
-  }
-  for (const c of COMPANIES) {
-    if (!c.parent) continue;
-    const parentId = byName.get(c.parent);
-    if (parentId) db.update(schema.companies).set({ parentId }).where(eq(schema.companies.id, byName.get(c.name)!)).run();
-  }
+  await run(
+    MARKETS.map((m) =>
+      db
+        .insert(schema.markets)
+        .values({ id: marketId(m.code), code: m.code, name: m.name, region: m.region, currency: m.currency, regulator: m.regulator, priority: m.priority })
+        .onConflictDoNothing(),
+    ),
+  );
+  await run(
+    COMPANIES.map((c) =>
+      db
+        .insert(schema.companies)
+        .values({
+          id: companyId(c.name),
+          marketId: marketId(c.market),
+          parentId: c.parent ? companyId(c.parent) : null,
+          name: c.name,
+          type: c.type,
+          website: c.website,
+          group: c.group,
+          brands: c.brands,
+        })
+        .onConflictDoNothing(),
+    ),
+  );
+  await run(
+    CATEGORIES.map((c) =>
+      db
+        .insert(schema.categories)
+        .values({ id: `cat_${c.code.toLowerCase()}`, code: c.code, segment: c.segment, nameEt: c.nameEt, nameEn: c.nameEn, subcategories: c.sub, sortOrder: c.order })
+        .onConflictDoNothing(),
+    ),
+  );
+  await run(
+    ARCHETYPES.map((a) =>
+      db.insert(schema.archetypes).values({ id: `arc_${a.code}`, code: a.code, nameEt: a.nameEt, nameEn: a.nameEn, description: a.d }).onConflictDoNothing(),
+    ),
+  );
+  await run(TRENDS.map(([code, et, en]) => db.insert(schema.trendTags).values({ id: `trend_${code}`, code, nameEt: et, nameEn: en }).onConflictDoNothing()));
+  return { markets: MARKETS.length, companies: COMPANIES.length, categories: CATEGORIES.length, archetypes: ARCHETYPES.length, trends: TRENDS.length };
 }
-
-function upsertCategories() {
-  for (const c of CATEGORIES) {
-    const ex = db.select().from(schema.categories).where(eq(schema.categories.code, c.code)).get();
-    if (ex) continue;
-    db.insert(schema.categories).values({ id: newId(), code: c.code, segment: c.segment, nameEt: c.nameEt, nameEn: c.nameEn, subcategories: c.sub, sortOrder: c.order }).run();
-  }
-}
-
-function upsertArchetypes() {
-  for (const a of ARCHETYPES) {
-    const ex = db.select().from(schema.archetypes).where(eq(schema.archetypes.code, a.code)).get();
-    if (ex) continue;
-    db.insert(schema.archetypes).values({ id: newId(), code: a.code, nameEt: a.nameEt, nameEn: a.nameEn, description: a.d }).run();
-  }
-}
-
-function upsertTrends() {
-  for (const [code, et, en] of TRENDS) {
-    const ex = db.select().from(schema.trendTags).where(eq(schema.trendTags.code, code)).get();
-    if (ex) continue;
-    db.insert(schema.trendTags).values({ id: newId(), code, nameEt: et, nameEn: en }).run();
-  }
-}
-
-const marketIds = upsertMarkets();
-upsertCompanies(marketIds);
-upsertCategories();
-upsertArchetypes();
-upsertTrends();
-console.log(`Seed valmis: ${MARKETS.length} turgu, ${COMPANIES.length} ettevõtet, ${CATEGORIES.length} kategooriat, ${ARCHETYPES.length} arhetüüpi, ${TRENDS.length} trenditeemat.`);

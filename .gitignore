@@ -1,8 +1,10 @@
 node_modules
 .next
+.open-next
+.wrangler
 out
-data/*.db
-data/*.db-*
+data/
 .env
 .env.local
 *.log
+.dev.vars

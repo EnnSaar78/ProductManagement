@@ -11,7 +11,7 @@ export default async function NewCompanyPage() {
   return (
     <>
       <PageHeader title={t("new")} />
-      <CompanyForm action={createCompany} markets={listMarkets()} companies={listCompanies()} />
+      <CompanyForm action={createCompany} markets={(await listMarkets())} companies={(await listCompanies())} />
     </>
   );
 }

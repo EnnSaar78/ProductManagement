@@ -1,26 +1,22 @@
-import Database from "better-sqlite3";
-import { drizzle } from "drizzle-orm/better-sqlite3";
+import { drizzle, type DrizzleD1Database } from "drizzle-orm/d1";
+import { getCloudflareContext } from "@opennextjs/cloudflare";
 import * as schema from "./schema";
-import fs from "node:fs";
-import path from "node:path";
 
-const dbPath = process.env.DATABASE_PATH ?? path.join(process.cwd(), "data", "app.db");
+export type Db = DrizzleD1Database<typeof schema>;
 
-declare global {
-  // eslint-disable-next-line no-var
-  var __telcoDb: ReturnType<typeof createDb> | undefined;
+export function getDb(): Db {
+  const { env } = getCloudflareContext();
+  return drizzle(env.DB, { schema });
 }
 
-function createDb() {
-  fs.mkdirSync(path.dirname(dbPath), { recursive: true });
-  const sqlite = new Database(dbPath);
-  sqlite.pragma("journal_mode = WAL");
-  sqlite.pragma("foreign_keys = ON");
-  return drizzle(sqlite, { schema });
-}
-
-export const db = globalThis.__telcoDb ?? createDb();
-if (process.env.NODE_ENV !== "production") globalThis.__telcoDb = db;
+/** Päringu-skoopi andmebaas: iga ligipääs lahendab D1 sidumise jooksva päringu kontekstist. */
+export const db: Db = new Proxy({} as Db, {
+  get(_target, prop) {
+    const real = getDb() as unknown as Record<string | symbol, unknown>;
+    const value = real[prop];
+    return typeof value === "function" ? (value as (...a: unknown[]) => unknown).bind(real) : value;
+  },
+});
 
 export { schema };
 export const newId = () => crypto.randomUUID();

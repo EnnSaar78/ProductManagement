@@ -9,9 +9,9 @@ export default async function Dashboard({ searchParams }: { searchParams: Promis
   const ts = await getTranslations("signals");
   const locale = await getLocale();
   const { forbidden } = await searchParams;
-  const stats = dashboardStats();
-  const signals = listSignals(8);
-  const products = listProducts().sort((a, b) => (a.updatedAt < b.updatedAt ? 1 : -1)).slice(0, 8);
+  const stats = (await dashboardStats());
+  const signals = (await listSignals(8));
+  const products = (await listProducts()).sort((a, b) => (a.updatedAt < b.updatedAt ? 1 : -1)).slice(0, 8);
   const statKeys = ["markets", "companies", "products", "signals", "sources"] as const;
   return (
     <>

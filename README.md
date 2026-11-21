@@ -19,41 +19,47 @@ Sisemine tööriist telekommunikatsiooni- ja IT-ettevõtete, nende toodete ja ä
 
 Kasutajaliides on eesti ja inglise keeles (vahetus külgribal). Sisu (tootekaardid) on eesti keeles.
 
-## Käivitamine
+## Kus sait töötab
+
+Rakendus jookseb Cloudflare Workers'is (Worker `productmanagement`) koos D1 andmebaasiga `productmanagement-db`. Iga push harusse `claude/friendly-hamilton-wlug4d` käivitab Cloudflare'is build'i ja juurutuse.
+
+**Esmakäivitus:** ava saidi aadress. Kui kasutajaid veel ei ole, suunatakse sind lehele `/setup`, kus lood esimese administraatori ja laed alusandmed. Pärast seda töötab ainult `/login`.
+
+## Kohalik arendus
 
 Eeldused: Node.js 22.
 
 ```bash
 npm install
-npm run db:migrate
-npm run db:seed
-npm run user:create -- sinu@email.ee "turvaline-parool-10+" "Sinu Nimi" admin
+```
+
+```bash
+npm run db:migrate:local
+```
+
+```bash
 npm run dev
 ```
 
-Ava http://localhost:3000 ja logi sisse.
-
-Toodangus:
+Ava http://localhost:3000. Kohalik D1 elab kaustas `.wrangler/` (ei lähe git'i). Toodangulähedane eelvaade Workeri käitusajal:
 
 ```bash
-npm run build
-npm run start
+npm run preview
 ```
-
-Andmebaas on üks SQLite-fail `data/app.db` (varundus = faili koopia). Asukohta saab muuta muutujaga `DATABASE_PATH`. Toodangus tuleb rakendus panna HTTPS-iga pöördproksi (Caddy, nginx) taha, sest sessiooniküpsis on `Secure`.
 
 ## Käsud
 
 | Käsk | Mida teeb |
 |---|---|
-| `npm run dev` | arendusserver |
-| `npm run build` / `npm run start` | toodanguehitus ja käivitus |
+| `npm run dev` | Next.js arendusserver kohaliku D1-ga |
+| `npm run preview` | ehitab Workeri ja käivitab `wrangler dev` all |
+| `npm run deploy` | ehitab ja juurutab käsitsi Cloudflare'i (tavaliselt teeb seda GitHubi push) |
 | `npm run typecheck` | TypeScripti kontroll |
 | `npm run db:generate` | genereerib uue migratsiooni pärast `src/db/schema.ts` muutmist |
-| `npm run db:migrate` | rakendab migratsioonid |
-| `npm run db:seed` | lisab alusandmed (turud, ettevõtted, taksonoomia, arhetüübid, trenditeemad); idempotentne |
-| `npm run db:reset` | kustutab andmebaasi ja teeb migratsiooni + seemne uuesti |
-| `npm run user:create -- <email> <parool> "<Nimi>" [admin\|editor\|viewer]` | loob või uuendab kasutaja käsurealt |
+| `npm run db:migrate:local` | rakendab migratsioonid kohalikule D1-le |
+| `npm run db:migrate:remote` | rakendab migratsioonid toodangu D1-le |
+
+Alusandmed (turud, ettevõtted, taksonoomia, arhetüübid, trenditeemad) laetakse `/setup` lehel või hiljem admini vaates nupuga "Lisa puuduvad alusandmed". Laadimine on idempotentne.
 
 ## Rollid
 
@@ -65,15 +71,18 @@ Andmebaas on üks SQLite-fail `data/app.db` (varundus = faili koopia). Asukohta 
 
 ```
 docs/                 metoodika ja arhitektuur
-drizzle/              SQL-migratsioonid
-src/db/               skeem, ühendus, seed, migratsioon, kasutaja loomine
+drizzle/              SQL-migratsioonid (D1)
+wrangler.jsonc        Cloudflare Workeri ja D1 seadistus
+open-next.config.ts   OpenNext Cloudflare adapter
+src/db/               skeem, D1 ühendus, alusandmete seed
 src/lib/auth.ts       sessioonid ja rollid
-src/lib/actions/      server actions (sisselogimine, sisu muutmine)
+src/lib/actions/      server actions (sisselogimine, esmakäivitus, sisu muutmine)
 src/lib/queries.ts    päringud
 src/messages/         UI tõlked (et, en)
 src/components/       taaskasutatavad komponendid (canvas, allikad, tabid)
 src/app/(app)/        kaitstud lehed
 src/app/login/        sisselogimine
+src/app/setup/        esmakäivitus (ainult tühja kasutajate tabeliga)
 ```
 
 ## Järgmised etapid

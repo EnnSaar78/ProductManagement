@@ -1,12 +1,14 @@
 import { getTranslations } from "next-intl/server";
 import { redirect } from "next/navigation";
 import { getCurrentUser } from "@/lib/auth";
+import { userCount } from "@/lib/queries";
 import { LoginForm } from "./LoginForm";
 import { LocaleSwitcher } from "@/components/LocaleSwitcher";
 
 export default async function LoginPage({ searchParams }: { searchParams: Promise<{ next?: string }> }) {
   const user = await getCurrentUser();
   if (user) redirect("/");
+  if ((await userCount()) === 0) redirect("/setup");
   const { next } = await searchParams;
   const t = await getTranslations("login");
   const ta = await getTranslations("app");

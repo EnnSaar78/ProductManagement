@@ -13,12 +13,12 @@ export default async function NewSignalPage() {
   const t = await getTranslations("signals");
   const tc = await getTranslations("common");
   const locale = await getLocale();
-  const markets = listMarkets();
-  const companies = listCompanies();
-  const products = listProducts();
-  const categories = listCategories();
-  const tags = listTrendTags();
-  const sources = db.select({ id: schema.sources.id, title: schema.sources.title }).from(schema.sources).orderBy(desc(schema.sources.fetchedAt)).limit(200).all();
+  const markets = (await listMarkets());
+  const companies = (await listCompanies());
+  const products = (await listProducts());
+  const categories = (await listCategories());
+  const tags = (await listTrendTags());
+  const sources = await db.select({ id: schema.sources.id, title: schema.sources.title }).from(schema.sources).orderBy(desc(schema.sources.fetchedAt)).limit(200).all();
   const tn = (x: { nameEt: string; nameEn: string }) => (locale === "en" ? x.nameEn : x.nameEt);
   return (
     <>

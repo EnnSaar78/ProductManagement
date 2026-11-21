@@ -1,21 +1,21 @@
 # Rakenduse arhitektuur
 
-**Staatus:** v0.1, 2026-11-21
+**Staatus:** v0.2, 2026-11-21 (Cloudflare Workers + D1)
 
 ## 1. Eesmärk ja põhimõtted
 
 - Sisemine, piiratud ringile mõeldud analüüsitööriist. Mitte kunagi avalik.
 - Iga andmeväärtus kannab päritolu: allikas (URL, kuupäev) või käsitsi sisestus (autor, kuupäev).
 - Ühtne struktuur üle kõigi toodete, et võrdlus oleks üks päring, mitte käsitöö.
-- Lihtne käitada: üks protsess, üks SQLite-fail. Pilve (Cloudflare D1) kolimine on draiverivahetus, mitte ümberkirjutus.
+- Lihtne käitada: serverivaba Cloudflare Workers + D1 (SQLite pilves), juurutus otse GitHubi harust.
 
 ## 2. Tehnoloogiavalik
 
 | Kiht | Valik | Põhjendus |
 |---|---|---|
-| Raamistik | Next.js 15 (App Router, React 19, TypeScript) | serveripoolne renderdus, server actions vormidele, laialt tuntud |
-| Andmebaas | SQLite (better-sqlite3) + Drizzle ORM | null-seadistusega arendus; Drizzle toetab sama skeemiga ka Cloudflare D1-te |
-| Autentimine | oma lahendus: e-post + parool (bcrypt), serveripoolsed sessioonid küpsises | ei sõltu välisteenustest; iseregistreerimist ei ole, kasutajaid lisab admin |
+| Raamistik | Next.js 15 (App Router, React 19, TypeScript) OpenNext Cloudflare adapteriga | serveripoolne renderdus, server actions vormidele, jookseb Cloudflare Workers'is |
+| Andmebaas | Cloudflare D1 (SQLite) + Drizzle ORM | serverivaba, varundus ja ajas tagasi kerimine (Time Travel) sisse ehitatud; sama skeem töötab kohalikus D1-s arenduses |
+| Autentimine | oma lahendus: e-post + parool (PBKDF2-SHA256, WebCrypto), serveripoolsed sessioonid küpsises | ei sõltu välisteenustest; iseregistreerimist ei ole, kasutajaid lisab admin; esimene admin luuakse `/setup` lehel, mis töötab ainult tühja kasutajate tabeliga |
 | Mitmekeelsus | next-intl ilma URL-i prefiksita, keel küpsises | UI-stringid `messages/et.json` ja `messages/en.json`; lisakeel = üks fail |
 | Stiil | Tailwind CSS 4 | kiire, ühtne, ilma komponenditeekide lukustuseta |
 
@@ -50,9 +50,9 @@ Kõik vabatekstid on eesti keeles. Väljad `*_original` hoiavad originaalkeelset
 ## 4. Turvamudel
 
 - Kogu sait on `proxy`/middleware'i taga: ilma kehtiva sessioonita suunatakse `/login` lehele.
-- Paroolid bcrypt-räsiga, sessioonitoken juhuslik 32 baiti, küpsis `HttpOnly; Secure; SameSite=Lax`, aegumine 30 päeva.
+- Paroolid PBKDF2-SHA256 räsiga (100 000 iteratsiooni, juhuslik sool), sessioonitoken juhuslik 32 baiti (salvestatakse SHA-256 räsina), küpsis `HttpOnly; Secure; SameSite=Lax`, aegumine 30 päeva.
 - Rollid: `admin` (kasutajate haldus), `editor` (sisu muutmine), `viewer` (ainult lugemine).
-- Esimene admin luuakse käsurealt (`npm run user:create`), iseregistreerimist ei ole.
+- Esimene admin luuakse `/setup` lehel (ainult kui kasutajaid pole), iseregistreerimist ei ole.
 - Rate-limit sisselogimisele (5 katset / 15 min / e-post).
 
 ## 5. Kogumise torujuhe (järgmine etapp)
@@ -61,6 +61,8 @@ Allikad → kogumine (fetch + tekstikoopia) → struktureerimine LLM-iga ühtses
 
 ## 6. Juurutus
 
-- Arendus: `npm run db:migrate && npm run db:seed && npm run dev`.
-- Toodang (lihtsaim): üks Node-protsess + SQLite-fail kettal, HTTPS pöördproksiga (Caddy/nginx), varundus failikoopiana.
-- Alternatiiv: Cloudflare Workers + D1 (OpenNext), Drizzle draiver `drizzle-orm/d1`; bcrypt asendada WebCrypto PBKDF2-ga.
+- **Cloudflare Workers Builds:** Worker `productmanagement` on seotud GitHubi repoga; iga push harusse käivitab build'i käsuga `npx opennextjs-cloudflare build` ja juurutuse käsuga `npx opennextjs-cloudflare deploy`.
+- **Konfiguratsioon:** `wrangler.jsonc` (Workeri nimi, D1 sidumine `DB`, staatilised failid, `nodejs_compat`).
+- **Andmebaas:** D1 `productmanagement-db`; migratsioonid kaustas `drizzle/`, rakendatakse käsuga `npx wrangler d1 migrations apply DB --remote`.
+- **Kohalik arendus:** `npm run db:migrate:local` ja `npm run dev` (Next dev koos kohaliku D1-ga) või `npm run preview` (ehitab Workeri ja käivitab selle `wrangler dev` all, lähim toodangule).
+- **Soovitus:** lisada Workeri ette Cloudflare Access (Zero Trust) täiendava kaitsekihina, kuna sait on ainult piiratud ringile.

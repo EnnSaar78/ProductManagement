@@ -9,11 +9,11 @@ export default async function CompaniesPage({ searchParams }: { searchParams: Pr
   const t = await getTranslations("companies");
   const tc = await getTranslations("common");
   const { market, q } = await searchParams;
-  const markets = listMarkets();
-  const products = listProducts();
+  const markets = (await listMarkets());
+  const products = (await listProducts());
   const pc = new Map<string, number>();
   for (const p of products) pc.set(p.companyId, (pc.get(p.companyId) ?? 0) + 1);
-  const rows = listCompanies().filter((c) => (!market || c.marketId === market) && (!q || c.name.toLowerCase().includes(q.toLowerCase())));
+  const rows = (await listCompanies()).filter((c) => (!market || c.marketId === market) && (!q || c.name.toLowerCase().includes(q.toLowerCase())));
   return (
     <>
       <PageHeader title={t("title")} actions={canEdit(user) ? <LinkButton href="/companies/new">{t("new")}</LinkButton> : undefined} />

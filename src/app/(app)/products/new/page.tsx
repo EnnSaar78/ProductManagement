@@ -12,7 +12,7 @@ export default async function NewProductPage({ searchParams }: { searchParams: P
   return (
     <>
       <PageHeader title={t("new")} />
-      <ProductForm action={createProduct} companies={listCompanies()} categories={listCategories()} archetypes={listArchetypes()} defaultCompanyId={company} />
+      <ProductForm action={createProduct} companies={(await listCompanies())} categories={(await listCategories())} archetypes={(await listArchetypes())} defaultCompanyId={company} />
     </>
   );
 }

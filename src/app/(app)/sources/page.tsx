@@ -11,9 +11,9 @@ export default async function SourcesPage() {
   const user = await requireUser();
   const editable = canEdit(user);
   const t = await getTranslations("sources");
-  const sources = db.select().from(schema.sources).orderBy(desc(schema.sources.fetchedAt)).limit(500).all();
-  const companyNames = new Map(db.select({ id: schema.companies.id, name: schema.companies.name }).from(schema.companies).all().map((c) => [c.id, c.name]));
-  const productNames = new Map(db.select({ id: schema.products.id, name: schema.products.name }).from(schema.products).all().map((p) => [p.id, p.name]));
+  const sources = await db.select().from(schema.sources).orderBy(desc(schema.sources.fetchedAt)).limit(500).all();
+  const companyNames = new Map((await db.select({ id: schema.companies.id, name: schema.companies.name }).from(schema.companies).all()).map((c) => [c.id, c.name]));
+  const productNames = new Map((await db.select({ id: schema.products.id, name: schema.products.name }).from(schema.products).all()).map((p) => [p.id, p.name]));
   void eq;
   return (
     <>

@@ -9,7 +9,7 @@ import { requireRole } from "@/lib/auth";
 export default async function EditProductPage({ params }: { params: Promise<{ id: string }> }) {
   await requireRole("admin", "editor");
   const { id } = await params;
-  const full = getProductFull(id);
+  const full = (await getProductFull(id));
   if (!full) notFound();
   const t = await getTranslations("products");
   return (
@@ -18,9 +18,9 @@ export default async function EditProductPage({ params }: { params: Promise<{ id
       <ProductForm
         action={updateProduct.bind(null, id)}
         product={full.product}
-        companies={listCompanies()}
-        categories={listCategories()}
-        archetypes={listArchetypes()}
+        companies={(await listCompanies())}
+        categories={(await listCategories())}
+        archetypes={(await listArchetypes())}
         selectedArchetypes={full.archetypes.map((a) => a.id)}
       />
     </>
