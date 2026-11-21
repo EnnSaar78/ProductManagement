@@ -43,6 +43,7 @@ export default async function CompaniesPage({ searchParams }: { searchParams: Pr
               <th>{tc("country")}</th>
               <th>{tc("type")}</th>
               <th>{t("group")}</th>
+              <th>{t("listing.title")}</th>
               <th>{tc("website")}</th>
               <th>{t("productsCount")}</th>
             </tr>
@@ -60,6 +61,16 @@ export default async function CompaniesPage({ searchParams }: { searchParams: Pr
                   <Badge>{t(`types.${c.type}`)}</Badge>
                 </td>
                 <td>{c.group ?? tc("none")}</td>
+                <td className="text-xs">
+                  {c.listingStatus === "listed" || c.listingStatus === "via_parent" ? (
+                    <span>
+                      {c.stockExchange}{c.ticker ? ` · ${c.ticker}` : ""}
+                      {c.listingStatus === "via_parent" && <span className="muted"> ({t("listing.statuses.via_parent")})</span>}
+                    </span>
+                  ) : (
+                    <span className="muted">{t(`listing.statuses.${c.listingStatus}`)}</span>
+                  )}
+                </td>
                 <td>
                   {c.website && (
                     <a href={c.website} target="_blank" rel="noreferrer" className="text-[var(--accent)] underline">

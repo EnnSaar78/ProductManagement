@@ -14,7 +14,7 @@ import { listProducts, sourceMap } from "@/lib/queries";
 import { canEdit, requireUser } from "@/lib/auth";
 
 const KPI_METRICS = [
-  "revenue", "service_revenue", "b2b_revenue", "ict_revenue", "ebitda", "ebitda_margin", "capex", "capex_to_sales",
+  "revenue", "revenue_growth", "service_revenue", "b2b_revenue", "ict_revenue", "ebitda", "ebitda_margin", "capex", "capex_to_sales",
   "mobile_subs", "fixed_subs", "tv_subs", "fmc_subs", "b2b_customers", "arpu_mobile", "arpu_fixed", "arpa_b2b",
   "churn", "nps", "coverage_5g", "fiber_passed", "fiber_connected", "employees", "market_share_mobile", "market_share_fixed",
 ] as const;
@@ -51,6 +51,14 @@ export default async function CompanyPage({ params }: { params: Promise<{ id: st
       <div className="grid gap-4 lg:grid-cols-3">
         <Card title={tc("name")} className="lg:col-span-1">
           <dl className="space-y-2 text-sm">
+            <div>
+              <dt className="muted text-xs">{t("listing.title")}</dt>
+              <dd>
+                <Badge>{t(`listing.statuses.${company.listingStatus}`)}</Badge>
+                {company.stockExchange && <span className="ml-2">{company.stockExchange}{company.ticker ? ` · ${company.ticker}` : ""}</span>}
+                {company.listedEntity && <div className="muted text-xs">{company.listedEntity}</div>}
+              </dd>
+            </div>
             {company.brands && (<div><dt className="muted text-xs">{t("brands")}</dt><dd>{company.brands}</dd></div>)}
             {company.website && (<div><dt className="muted text-xs">{tc("website")}</dt><dd><a className="text-[var(--accent)] underline" href={company.website} target="_blank" rel="noreferrer">{company.website}</a></dd></div>)}
             {company.segments && (<div><dt className="muted text-xs">{t("segments")}</dt><dd>{company.segments}</dd></div>)}

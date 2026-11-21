@@ -6,6 +6,7 @@
  */
 import type { Db } from "./index";
 import * as schema from "./schema";
+import { eq } from "drizzle-orm";
 
 type MarketSeed = { code: string; name: string; region: string; currency: string; regulator: string; priority: number };
 const MARKETS: MarketSeed[] = [
@@ -131,6 +132,90 @@ const COMPANIES: CompanySeed[] = [
   { market: "AU", name: "Optus", type: "challenger", website: "https://www.optus.com.au", group: "Singtel" },
 ];
 
+export const LISTING: Record<string, { status: "listed" | "via_parent" | "private" | "state"; exchange: string | null; ticker: string | null; entity: string | null }> = {
+  "Telia Eesti": { status: "via_parent", exchange: "Nasdaq Stockholm", ticker: "TELIA", entity: "Telia Company AB" },
+  "Elisa Eesti": { status: "via_parent", exchange: "Nasdaq Helsinki", ticker: "ELISA", entity: "Elisa Oyj" },
+  "Tele2 Eesti": { status: "via_parent", exchange: "Nasdaq Stockholm", ticker: "TEL2 B", entity: "Tele2 AB" },
+  "Elisa": { status: "listed", exchange: "Nasdaq Helsinki", ticker: "ELISA", entity: null },
+  "Elisa Santa Monica": { status: "via_parent", exchange: "Nasdaq Helsinki", ticker: "ELISA", entity: "Elisa Oyj" },
+  "Telia Finland": { status: "via_parent", exchange: "Nasdaq Stockholm", ticker: "TELIA", entity: "Telia Company AB" },
+  "DNA": { status: "via_parent", exchange: "Oslo Børs", ticker: "TEL", entity: "Telenor ASA" },
+  "Telia Sverige": { status: "via_parent", exchange: "Nasdaq Stockholm", ticker: "TELIA", entity: "Telia Company AB" },
+  "Telia Cygate": { status: "via_parent", exchange: "Nasdaq Stockholm", ticker: "TELIA", entity: "Telia Company AB" },
+  "Tele2 Sverige": { status: "listed", exchange: "Nasdaq Stockholm", ticker: "TEL2 B", entity: "Tele2 AB" },
+  "Telenor Sverige": { status: "via_parent", exchange: "Oslo Børs", ticker: "TEL", entity: "Telenor ASA" },
+  "Tre Sverige": { status: "via_parent", exchange: "HKEX", ticker: "0001", entity: "CK Hutchison Holdings" },
+  "Telenor Norge": { status: "via_parent", exchange: "Oslo Børs", ticker: "TEL", entity: "Telenor ASA" },
+  "Telia Norge": { status: "via_parent", exchange: "Nasdaq Stockholm", ticker: "TELIA", entity: "Telia Company AB" },
+  "Ice": { status: "state", exchange: null, ticker: null, entity: "Lyse AS (omavalitsuste omand)" },
+  "TDC Net / Nuuday": { status: "private", exchange: null, ticker: null, entity: "Macquarie'i juhitud konsortsium" },
+  "Telenor Danmark": { status: "via_parent", exchange: "Oslo Børs", ticker: "TEL", entity: "Telenor ASA" },
+  "Telia Danmark": { status: "via_parent", exchange: "Nasdaq Stockholm", ticker: "TELIA", entity: "Telia Company AB" },
+  "LMT": { status: "state", exchange: null, ticker: null, entity: "Läti riik ja Telia Company" },
+  "Tet": { status: "state", exchange: null, ticker: null, entity: "Läti riik 51 %, Telia Company 49 %" },
+  "Bite Latvija": { status: "private", exchange: null, ticker: null, entity: "Providence Equity Partners" },
+  "Telia Lietuva": { status: "listed", exchange: "Nasdaq Vilnius", ticker: "TEL1L", entity: null },
+  "Bite Lietuva": { status: "private", exchange: null, ticker: null, entity: "Providence Equity Partners" },
+  "KPN": { status: "listed", exchange: "Euronext Amsterdam", ticker: "KPN", entity: null },
+  "Odido": { status: "private", exchange: null, ticker: null, entity: "Apax Partners ja Warburg Pincus" },
+  "VodafoneZiggo": { status: "via_parent", exchange: "LSE / Nasdaq", ticker: "VOD / LBTYA", entity: "Vodafone Group plc / Liberty Global (ühisettevõte)" },
+  "Proximus": { status: "listed", exchange: "Euronext Brussels", ticker: "PROX", entity: null },
+  "Orange Belgium": { status: "listed", exchange: "Euronext Brussels", ticker: "OBEL", entity: "Orange SA (enamusomanik)" },
+  "Telenet": { status: "via_parent", exchange: "Nasdaq", ticker: "LBTYA", entity: "Liberty Global (noteering lõpetatud 2023)" },
+  "Deutsche Telekom": { status: "listed", exchange: "Frankfurt (Xetra)", ticker: "DTE", entity: null },
+  "T-Systems": { status: "via_parent", exchange: "Frankfurt (Xetra)", ticker: "DTE", entity: "Deutsche Telekom AG" },
+  "Vodafone Deutschland": { status: "via_parent", exchange: "LSE", ticker: "VOD", entity: "Vodafone Group plc" },
+  "Telefónica Deutschland (O2)": { status: "via_parent", exchange: "BME", ticker: "TEF", entity: "Telefónica S.A. (Frankfurdi noteering lõpetatud)" },
+  "1&1": { status: "listed", exchange: "Frankfurt (Xetra)", ticker: "1U1", entity: "United Internet AG (enamusomanik)" },
+  "A1 Telekom Austria": { status: "listed", exchange: "Wiener Börse", ticker: "TKA", entity: null },
+  "Magenta Telekom": { status: "via_parent", exchange: "Frankfurt (Xetra)", ticker: "DTE", entity: "Deutsche Telekom AG" },
+  "Drei Austria": { status: "via_parent", exchange: "HKEX", ticker: "0001", entity: "CK Hutchison Holdings" },
+  "Swisscom": { status: "listed", exchange: "SIX Swiss Exchange", ticker: "SCMN", entity: null },
+  "Sunrise": { status: "listed", exchange: "SIX Swiss Exchange / Nasdaq", ticker: "SUNN / SNRE", entity: null },
+  "Salt": { status: "private", exchange: null, ticker: null, entity: "NJJ Capital" },
+  "BT Group": { status: "listed", exchange: "LSE", ticker: "BT.A", entity: null },
+  "BT Business": { status: "via_parent", exchange: "LSE", ticker: "BT.A", entity: "BT Group plc" },
+  "VodafoneThree": { status: "via_parent", exchange: "LSE / HKEX", ticker: "VOD / 0001", entity: "Vodafone Group plc / CK Hutchison (ühisettevõte)" },
+  "Virgin Media O2": { status: "via_parent", exchange: "Nasdaq / BME", ticker: "LBTYA / TEF", entity: "Liberty Global / Telefónica (ühisettevõte)" },
+  "Sky": { status: "via_parent", exchange: "Nasdaq", ticker: "CMCSA", entity: "Comcast Corporation" },
+  "Eir": { status: "private", exchange: null, ticker: null, entity: "NJJ / Iliad" },
+  "Vodafone Ireland": { status: "via_parent", exchange: "LSE", ticker: "VOD", entity: "Vodafone Group plc" },
+  "Three Ireland": { status: "via_parent", exchange: "HKEX", ticker: "0001", entity: "CK Hutchison Holdings" },
+  "Orange": { status: "listed", exchange: "Euronext Paris", ticker: "ORA", entity: null },
+  "Orange Business": { status: "via_parent", exchange: "Euronext Paris", ticker: "ORA", entity: "Orange SA" },
+  "SFR": { status: "private", exchange: null, ticker: null, entity: "Altice France" },
+  "Bouygues Telecom": { status: "via_parent", exchange: "Euronext Paris", ticker: "EN", entity: "Bouygues SA" },
+  "Free (Iliad)": { status: "private", exchange: null, ticker: null, entity: "Iliad Holding (noteering lõpetatud 2021)" },
+  "Telefónica España": { status: "via_parent", exchange: "BME / NYSE", ticker: "TEF", entity: "Telefónica S.A." },
+  "MasOrange": { status: "private", exchange: null, ticker: null, entity: "Orange SA ja MásMóvili aktsionärid (ühisettevõte)" },
+  "Digi Spain": { status: "via_parent", exchange: "Bucharest Stock Exchange", ticker: "DIGI", entity: "Digi Communications N.V." },
+  "MEO (Altice Portugal)": { status: "private", exchange: null, ticker: null, entity: "Altice Portugal" },
+  "NOS": { status: "listed", exchange: "Euronext Lisbon", ticker: "NOS", entity: null },
+  "Vodafone Portugal": { status: "via_parent", exchange: "LSE", ticker: "VOD", entity: "Vodafone Group plc" },
+  "TIM": { status: "listed", exchange: "Borsa Italiana", ticker: "TIT", entity: null },
+  "Vodafone Italia / Fastweb": { status: "via_parent", exchange: "SIX Swiss Exchange", ticker: "SCMN", entity: "Swisscom AG" },
+  "WindTre": { status: "via_parent", exchange: "HKEX", ticker: "0001", entity: "CK Hutchison Holdings" },
+  "Iliad Italia": { status: "private", exchange: null, ticker: null, entity: "Iliad Holding" },
+  "Orange Polska": { status: "listed", exchange: "Warsaw Stock Exchange", ticker: "OPL", entity: null },
+  "Play": { status: "private", exchange: null, ticker: null, entity: "Iliad Holding" },
+  "Plus (Polkomtel)": { status: "via_parent", exchange: "Warsaw Stock Exchange", ticker: "CPS", entity: "Cyfrowy Polsat S.A." },
+  "T-Mobile Polska": { status: "via_parent", exchange: "Frankfurt (Xetra)", ticker: "DTE", entity: "Deutsche Telekom AG" },
+  "Verizon": { status: "listed", exchange: "NYSE", ticker: "VZ", entity: null },
+  "AT&T": { status: "listed", exchange: "NYSE", ticker: "T", entity: null },
+  "T-Mobile US": { status: "listed", exchange: "Nasdaq", ticker: "TMUS", entity: "Deutsche Telekom AG (enamusomanik)" },
+  "NTT Docomo": { status: "via_parent", exchange: "Tokyo Stock Exchange", ticker: "9432", entity: "NTT (noteering lõpetatud 2020)" },
+  "KDDI (au)": { status: "listed", exchange: "Tokyo Stock Exchange", ticker: "9433", entity: null },
+  "SoftBank": { status: "listed", exchange: "Tokyo Stock Exchange", ticker: "9434", entity: null },
+  "Rakuten Mobile": { status: "via_parent", exchange: "Tokyo Stock Exchange", ticker: "4755", entity: "Rakuten Group" },
+  "SK Telecom": { status: "listed", exchange: "KRX / NYSE", ticker: "017670 / SKM", entity: null },
+  "KT": { status: "listed", exchange: "KRX / NYSE", ticker: "030200 / KT", entity: null },
+  "LG Uplus": { status: "listed", exchange: "KRX", ticker: "032640", entity: null },
+  "Singtel": { status: "listed", exchange: "SGX", ticker: "Z74", entity: null },
+  "StarHub": { status: "listed", exchange: "SGX", ticker: "CC3", entity: null },
+  "Telstra": { status: "listed", exchange: "ASX", ticker: "TLS", entity: null },
+  "Optus": { status: "via_parent", exchange: "SGX", ticker: "Z74", entity: "Singtel" },
+};
+
 const CATEGORIES = [
   // B2B (esimene etapp)
   { code: "B-MOB", segment: "B2B", nameEt: "Ärimobiil", nameEn: "Business mobile", sub: "paketid, jagatud andmemaht, MDM, rahvusvahelised paketid", order: 10 },
@@ -241,6 +326,15 @@ export async function seedReferenceData(db: Db) {
           brands: c.brands,
         })
         .onConflictDoNothing(),
+    ),
+  );
+  // Börsiinfo uuendatakse alati (ka olemasolevatel ridadel)
+  await run(
+    Object.entries(LISTING).map(([name, l]) =>
+      db
+        .update(schema.companies)
+        .set({ listingStatus: l.status, stockExchange: l.exchange, ticker: l.ticker, listedEntity: l.entity })
+        .where(eq(schema.companies.id, companyId(name))),
     ),
   );
   await run(

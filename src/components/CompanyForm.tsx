@@ -3,6 +3,7 @@ import { Field } from "@/components/ui";
 import type { schema } from "@/db";
 
 type Company = typeof schema.companies.$inferSelect;
+const LISTING = ["listed", "via_parent", "private", "state", "unknown"] as const;
 const TYPES = ["incumbent", "challenger", "mvno", "cable", "it_arm", "integrator", "wholesale", "other"] as const;
 
 export async function CompanyForm({
@@ -64,6 +65,24 @@ export async function CompanyForm({
       </Field>
       <Field label={t("segments")}>
         <input name="segments" defaultValue={company?.segments ?? ""} placeholder="B2C, SME, suurettevõte, avalik sektor, hulgimüük" />
+      </Field>
+      <Field label={t("listing.status")}>
+        <select name="listingStatus" defaultValue={company?.listingStatus ?? "unknown"}>
+          {LISTING.map((x) => (
+            <option key={x} value={x}>
+              {t(`listing.statuses.${x}`)}
+            </option>
+          ))}
+        </select>
+      </Field>
+      <Field label={t("listing.exchange")}>
+        <input name="stockExchange" defaultValue={company?.stockExchange ?? ""} placeholder="Nasdaq Stockholm" />
+      </Field>
+      <Field label={t("listing.ticker")}>
+        <input name="ticker" defaultValue={company?.ticker ?? ""} />
+      </Field>
+      <Field label={t("listing.entity")}>
+        <input name="listedEntity" defaultValue={company?.listedEntity ?? ""} />
       </Field>
       <Field label={t("strategy")} className="md:col-span-2">
         <textarea name="strategy" rows={4} defaultValue={company?.strategy ?? ""} />

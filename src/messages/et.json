@@ -136,7 +136,22 @@
       "fiber_connected": "Fiiber connected",
       "employees": "Töötajad",
       "market_share_mobile": "Turuosa mobiil",
-      "market_share_fixed": "Turuosa fiks"
+      "market_share_fixed": "Turuosa fiks",
+      "revenue_growth": "Käibe kasv a/a"
+    },
+    "listing": {
+      "title": "Börsiinfo",
+      "status": "Noteering",
+      "exchange": "Börs",
+      "ticker": "Sümbol",
+      "entity": "Noteeritud üksus / omanik",
+      "statuses": {
+        "listed": "Börsil noteeritud",
+        "via_parent": "Noteeritud emaettevõtte kaudu",
+        "private": "Erakapital",
+        "state": "Avalik omand",
+        "unknown": "Teadmata"
+      }
     }
   },
   "products": {

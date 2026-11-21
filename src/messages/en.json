@@ -136,7 +136,22 @@
       "fiber_connected": "Fiber connected",
       "employees": "Employees",
       "market_share_mobile": "Market share mobile",
-      "market_share_fixed": "Market share fixed"
+      "market_share_fixed": "Market share fixed",
+      "revenue_growth": "Revenue growth YoY"
+    },
+    "listing": {
+      "title": "Stock listing",
+      "status": "Listing",
+      "exchange": "Exchange",
+      "ticker": "Ticker",
+      "entity": "Listed entity / owner",
+      "statuses": {
+        "listed": "Publicly listed",
+        "via_parent": "Listed via parent",
+        "private": "Private",
+        "state": "Public ownership",
+        "unknown": "Unknown"
+      }
     }
   },
   "products": {

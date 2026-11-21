@@ -55,6 +55,10 @@ export async function createCompany(fd: FormData) {
       segments: str(fd, "segments"),
       strategy: str(fd, "strategy"),
       notes: str(fd, "notes"),
+      listingStatus: oneOf(fd, "listingStatus", ["listed", "via_parent", "private", "state", "unknown"] as const, "unknown"),
+      stockExchange: str(fd, "stockExchange"),
+      ticker: str(fd, "ticker"),
+      listedEntity: str(fd, "listedEntity"),
     })
     .run();
   await audit(u.id, "company", id, "create");
@@ -76,6 +80,10 @@ export async function updateCompany(id: string, fd: FormData) {
       segments: str(fd, "segments"),
       strategy: str(fd, "strategy"),
       notes: str(fd, "notes"),
+      listingStatus: oneOf(fd, "listingStatus", ["listed", "via_parent", "private", "state", "unknown"] as const, "unknown"),
+      stockExchange: str(fd, "stockExchange"),
+      ticker: str(fd, "ticker"),
+      listedEntity: str(fd, "listedEntity"),
       updatedAt: new Date().toISOString(),
     })
     .where(eq(schema.companies.id, id))

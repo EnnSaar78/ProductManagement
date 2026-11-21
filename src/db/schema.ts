@@ -85,6 +85,11 @@ export const companies = sqliteTable("companies", {
   segments: text("segments"),
   strategy: text("strategy"),
   notes: text("notes"),
+  // Börsiinfo
+  listingStatus: text("listing_status", { enum: ["listed", "via_parent", "private", "state", "unknown"] }).notNull().default("unknown"),
+  stockExchange: text("stock_exchange"), // nt Nasdaq Stockholm, Euronext Paris, SIX, NYSE
+  ticker: text("ticker"),
+  listedEntity: text("listed_entity"), // noteeritud emaettevõte, kui listingStatus = via_parent
   updatedAt: text("updated_at").notNull().default(now()),
 });
 
