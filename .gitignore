@@ -8,3 +8,5 @@ data/
 .env.local
 *.log
 .dev.vars
+
+tsconfig.tsbuildinfo
